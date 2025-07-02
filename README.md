@@ -116,7 +116,7 @@ This project uses the following third-party data and services:
 
 ### Map Data
 - **OpenStreetMap**: © OpenStreetMap contributors. The map data is available under the [Open Data Commons Open Database License (ODbL)](https://www.openstreetmap.org/copyright).
-- **OpenRailwayMap**: © OpenRailwayMap and contributors. The railway data is available under the [Open Data Commons Open Database License (ODbL)](https://www.openrailwaymap.org/imprint.html).
+- **OpenRailwayMap**: © OpenRailwayMap and contributors. The railway data is available under the [Open Data Commons Open Database License (ODbL)](https://www.openrailwaymap.org/imprint-en.html).
 
 ### Libraries
 - **Leaflet**: © Vladimir Agafonkin. Leaflet is used for map rendering and is available under the [BSD 2-Clause License](https://github.com/Leaflet/Leaflet/blob/main/LICENSE).
