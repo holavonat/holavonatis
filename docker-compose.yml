@@ -1,0 +1,10 @@
+services:
+  holavonatis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: holavonatis:latest
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    

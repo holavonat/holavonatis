@@ -1,0 +1,12 @@
+/*
+  Access-Control-Allow-Origin: https://static.cloudflareinsights.com
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://unpkg.com https://static.cloudflareinsights.com 'unsafe-inline'; style-src 'self' https://unpkg.com 'unsafe-inline'; object-src 'none'; img-src 'self' https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://a.tiles.openrailwaymap.org https://b.tiles.openrailwaymap.org https://c.tiles.openrailwaymap.org data:; connect-src 'self' https://cdn.holavonat.is https://cloudflareinsights.com/cdn-cgi/rum; 
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Access-Control-Allow-Origin: https://holavonat.is
+  Cross-Origin-Embedder-Policy: same-origin
+  Cross-Origin-Opener-Policy: same-origin

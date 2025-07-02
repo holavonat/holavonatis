@@ -1,0 +1,34 @@
+GraphqlEndpoint: https://example.com/graphql
+Output:
+   NamePrefix: train_data
+   Format:
+      JSON: true
+   Archive: true/
+ObjectStorage:
+  Compression: br
+  AccessKeyID: <access-key>
+  SecretAccessKey: <secret-key>
+  BucketName: <bucket-name>
+  ObjectPath: <object-path-could-be-empty>
+  EndpointURL: <endpoint-url>
+  PublicEndpointURL: <public-endpoint>
+File:
+   Path: <file-output-path>
+Headers:
+  User-Agent: holavonatis/v0.0.1 (https://instance.example.com/)
+  Referrer: https://instance.example.com/
+  Origin: https://instance.example.com
+Cron:
+  Mode: fix
+  Duration: second 
+  Fix: 
+    Interval: 30
+Source:
+  Origin:    "https://instance.example.com/"
+  Latest:    "https://instance.example.com/"
+  Schema:
+    Version: "v0.0.1"
+    Link:    "https://instance.example.com/schema.json"
+    Format:  "json"
+Network:
+   Proxy: "socks5://127.0.0.0:3124"

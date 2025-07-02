@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hol a vonat?</title>
+  <meta property="og:title" content="Hol a vonat?" />
+  <meta property="og:description" content="Valós idejű magyar vonatkövetés térképen. Nézd meg, hol járnak a vonatok most!" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://holavonat.is/" />
+  <meta property="og:locale" content="hu_HU" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="dns-prefetch" href="//unpkg.com">
+  <link rel="dns-prefetch" href="//cdn.holavonat.is">
+  <link rel="dns-prefetch" href="//a.tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="//b.tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="//c.tile.openstreetmap.org">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+  </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    #header {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      transition: opacity 1s ease;
+      opacity: 1;
+    }
+    
+    #disclaimer {
+      position: absolute;
+      bottom: 28px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      z-index: 1000;
+      color: darkred;
+      box-sizing: border-box;
+      max-width: 90vw;
+      min-width: 180px;
+      width: auto;
+      word-break: break-word;
+    }
+    .passed { background-color: #c8e6c9; }
+    .delayed { color: red; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 12px;
+    }
+    td, th {
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    .marker-container {
+      position: relative;
+      width: 26px;
+      height: 26px;
+    }
+
+    .triangle-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 26px;
+      height: 26px;
+      transform-origin: center center;
+      z-index: 0;
+    }
+
+    .triangle {
+      position: absolute;
+      top: -8px;
+      left: 3px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 20px solid black;
+    }
+
+    .circle {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--color);
+      border: 2px solid black;
+      transform-origin: center center;
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .popup-table-container {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 5px;
+      max-width: 60vw;
+    }
+
+    .legend {
+      background: rgba(255,255,255,0.7);
+      padding: 6px;
+      line-height: 18px;
+      color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+
+    .legend i {
+      padding: 2px;
+      width: 12px;
+      height: 12px;
+      float: left;
+      margin-right: 8px;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .leaflet-popup-close-button {
+      font-size: 32px !important; 
+      width: 40px !important;
+      height: 40px !important;
+      line-height: 40px !important;
+      top: 8px !important;
+      right: 8px !important;
+    }
+
+    @media (max-width: 600px) {
+      .leaflet-popup-content {
+        max-width: 70vw !important;
+        min-width: 0 !important;
+        width: 100vw !important;
+        max-height: 65vh !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        font-size: clamp(14px, 4vw, 20px) !important;
+        box-sizing: border-box;
+        padding: 3vw 2vw 3vw 2vw !important;
+      }
+      .popup-table-container {
+        max-height: 40vh !important;
+        overflow-y: auto !important;
+        max-width: 98vw !important;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+      .leaflet-popup-content table {
+        font-size: clamp(12px, 3.5vw, 18px) !important;
+        min-width: 90vw;
+        width: 100%;
+        word-break: break-word;
+        overflow-x: auto;
+        display: block;
+      }
+      .leaflet-popup-content th,
+      .leaflet-popup-content td {
+        padding: 2vw 1vw !important;
+        font-size: inherit !important;
+        white-space: pre-line;
+      }
+      #disclaimer {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header">Hol a vonat?</div>
+  <div id="map"></div>
+  <div id="disclaimer">
+    RIP <a href="https://holavonat.hu">holavonat.hu</a><br><br>
+
+    Mirrors: <br>
+    <a href="https://holavonat.github.io/instances" target="_blank" rel="noopener">holavonat.github.io/instances</a><br>
+    Nyers adatok (CORS *): <br>
+    <a href="https://cdn.holavonat.is/train_data_v2.json" target="_blank" rel="noopener">cdn.holavonat.is/train_data_v2.json</a><br><br>
+    Email: <a href="mailto:j@holavonat.is">j@holavonat.is</a>
+  </div>
+  <div id="stale-warning" style="display:none;position:absolute;top:0;left:0;width:100%;background:rgba(255,0,0,0.85);color:white;text-align:center;padding:10px;z-index:2000;font-size:16px;">
+    Figyelem! Az adatok utolsó frissítése régen volt. Az információk elavultak lehetnek.
+  </div>
+
+  <script>
+    const map = L.map('map', { attributionControl: true }).setView([47.3, 19.1], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors | ' +
+               '<a href="https://www.openrailwaymap.org/" target="_blank" rel="noopener">OpenRailwayMap</a>'
+    }).addTo(map);
+    L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+      maxZoom: 18
+    }).addTo(map);
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function () {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML += "<b>Színek jelentése</b><br>";
+      div.innerHTML += '<i style="background: #00e400"></i>0-4 perc késés<br>';
+      div.innerHTML += '<i style="background: #bfff00"></i>5-14 perc késés<br>';
+      div.innerHTML += '<i style="background: #ffe600"></i>15-20 perc késés<br>';
+      div.innerHTML += '<i style="background: #ff9900"></i>21-60 perc késés<br>';
+      div.innerHTML += '<i style="background: #ff0000"></i>60+ perc késés<br>';
+      div.innerHTML += '<br><b>Frissitve:</b> <span id="timestamp">...</span><br>';
+      return div;
+    };
+
+    legend.addTo(map);
+
+    let markers = [];
+    let lastEtag = null;
+    let lastMetrics = null;
+
+
+    function delayColor(min) {
+      if (min >= 60) return '#ff0000';      
+      if (min >= 21) return '#ff9900';
+      if (min >= 15) return '#ffe600';
+      if (min >= 5)  return '#bfff00'; 
+      return '#00e400';
+    }
+
+    function createMarkerIcon(color, heading) {
+      const container = document.createElement("div");
+      container.className = "marker-container";
+
+      const triangleWrapper = document.createElement("div");
+      triangleWrapper.className = "triangle-wrapper";
+      triangleWrapper.style.transform = `rotate(${heading}deg)`;
+
+      const triangle = document.createElement("div");
+      triangle.className = "triangle";
+
+      const circle = document.createElement("div");
+      circle.className = "circle";
+      circle.style.setProperty('--color', color);
+
+      triangleWrapper.appendChild(triangle);
+      container.appendChild(triangleWrapper);
+      container.appendChild(circle);
+
+      return L.divIcon({ html: container, className: '', iconSize: [30, 30] });
+    }
+
+    function formatTime(sec) {
+      if (sec == null) return '-';
+      const h = (String(Math.floor(sec / 3600)).padStart(2, '0'))%24;
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function getCurrentDelay(stops, now) {
+      for (const stop of stops) {
+        const arrivalTime = stop.realtimeArrival;
+        if (arrivalTime > now) {
+          return stop.arrivalDelay || stop.departureDelay || 0; 
+        }
+      }
+      const lastStop = stops[stops.length - 1];
+      return lastStop ? (lastStop.arrivalDelay || lastStop.departureDelay || 0) : 0;
+    }
+
+    async function getMetrics() {
+      try {
+        const rnd = Date.now();
+        const headResp = await fetch(`https://cdn.holavonat.is/train_data_v2.json?_=${rnd}`, { method: "HEAD" });
+        const etag = headResp.headers.get('ETag');
+        if (etag && etag === lastEtag && lastMetrics) {
+          return;
+        }
+        const response = await fetch(`https://cdn.holavonat.is/train_data_v2.json?_=${rnd}`, {});
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+
+        const data = await response.json();
+        lastEtag = etag;
+        lastMetrics = data;
+      }
+      catch (err) {
+        console.error("Hiba történt az adatok betöltésekor:", err);
+      }
+      return lastMetrics;
+    }
+
+    async function loadMetrics(metrics) {
+
+      const now = new Date();
+      const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      markers.forEach(m => m.remove());
+      markers = [];
+
+      document.getElementById("timestamp").textContent =
+        `${new Date(metrics.timestamp).toLocaleTimeString("hu-HU", { timeZone: "Europe/Budapest" })}`;
+
+      var secondsSinceUpdate = (now.getTime() - new Date(metrics.timestamp).getTime()) / 1000;
+      const warningDiv = document.getElementById("stale-warning");
+      if (secondsSinceUpdate > 60 * 2) {
+        warningDiv.style.display = "block";
+        warningDiv.textContent = "Figyelem! Az adatok utolsó frissítése " + new Date(metrics.timestamp).toLocaleTimeString('hu-HU', { timeZone: "Europe/Budapest"}) + "-kor volt! Az információk elavultak lehetnek.";
+      } else {
+        warningDiv.style.display = "none";
+      }
+
+      try {
+        metrics.vehiclePositions.forEach(vehicle => {
+          const delay = Math.round(getCurrentDelay(vehicle.trip.stoptimes, nowSec) / 60);
+          const delayText = delay >= 1 ? `${delay} perc késés` : 'nincs késés';
+          const color = delayColor(delay);
+          const heading = vehicle.heading || 0;
+          const speed = Math.round((vehicle.speed || 0) * 3.6);
+
+          const marker = L.marker([vehicle.lat, vehicle.lon], {
+            icon: createMarkerIcon(color, heading)
+          }).addTo(map);
+
+          marker.bindTooltip(`${vehicle.trip.tripShortName} (${vehicle.vehicleId}) (${speed} km/h) - ${delayText}`, {
+            direction: "top"
+          });
+
+          let table = '<div class="popup-table-container"><table><tr><th>Állomás</th><th>Érk.</th><th>Ind.</th><th>Vágány</th></tr>';
+          vehicle.trip.stoptimes.forEach(stop => {
+            const arr = formatTime(stop.scheduledArrival);
+            const rta = formatTime(stop.realtimeArrival);
+            const dep = formatTime(stop.scheduledDeparture);
+            const rtd = formatTime(stop.realtimeDeparture); 
+            let track = stop.stop.platformCode
+            if (track == null) {
+              track = "-";
+            }
+            const arrDelay = (stop.arrivalDelay || 0) / 60;
+            const depDelay = (stop.departureDelay || 0) / 60;
+            const delayedClass = (arrDelay > 0 || depDelay > 0) ? 'delayed' : '';
+            const isPassed = (stop.realtimeDeparture || 0) < nowSec;
+
+            table += `<tr class="${isPassed ? 'passed' : ''}">
+              <td>${stop.stop.name}</td>
+              <td>${arr}<br><span class="${delayedClass}">${rta}</span></td>
+              <td>${dep}<br><span class="${delayedClass}">${rtd}</span></td>
+              <td>${track}</td>
+            </tr>`;
+          });
+          table += '</table></div>';
+
+          
+
+          const id = vehicle.vehicleId.split(":")[1];
+          const match = id.match(/^(\d{2})(\d{2})(\d{4})(\d{3})(\d)$/);
+          var uic = '';
+          if (match) {
+            uic = `${match[1]} ${match[2]} ${match[3]} ${match[4]}-${match[5]}`;
+          } else {
+            uic = id;
+          }          
+
+          var services = "";
+          const serviceDetails = new Map();
+          if (vehicle.trip.infoServices != null) {
+            vehicle.trip.infoServices.forEach(service => {
+              let pictogram = "";
+              switch (service.name) {
+                case "HungaryPass accepted":
+                  service.name = "Ország Bérlettel használható";
+                  pictogram = "🇭🇺";
+                  break;
+                case "BudapestPass accepted.":
+                  service.name = "Budapest Bérlettel használható";
+                  pictogram = "🚇";
+                  break;
+                case "premium class":
+                  service.name = "Prémium osztály";
+                  pictogram = "✨";
+                  break;
+                case "Second Class":
+                  service.name = "Másodosztály";
+                  pictogram = "2️⃣";
+                  break;
+                case "First class in the train":
+                  service.name = "Első osztály";
+                  pictogram = "1️⃣";
+                  break;
+                case "Seat Reservation compulsory":
+                  service.name = "Helyjegy kötelező";
+                  pictogram = "💺";
+                  break;
+                case "A wagon suitable for wheelchair travel with a lifting device":
+                  service.name = "Mozgáskorlátozottak számára hozzáférhető kocsi emelővel";
+                  pictogram = "♿";
+                  break;
+                case "A wagon suitable for wheelchair travel without a lifting device":
+                  service.name = "Mozgáskorlátozottak számára hozzáférhető kocsi emelő nélkül";
+                  pictogram = "♿";
+                  break;
+                case "Bicycle transport is not possible":
+                  service.name = "Kerékpár szállítás nem lehetséges";
+                  pictogram = "🚳";
+                  break;
+                case "Bicycle transport in the designated place. (Limited space, we recommend to notify us in advance of the trip for more than 6 bycicles.)":
+                  service.name = "Kerékpár szállítás a kijelölt helyen. (Korlátozott hely, javasoljuk, hogy előre jelezze az utazást több mint 6 kerékpár esetén.)";
+                  pictogram = "🚴";
+                  break;
+                case "Long distance train":
+                  service.name = "Hosszútávú vonat";
+                  pictogram = "🚆";
+                  break;
+                case "buffet":
+                  service.name = "Büfé";
+                  pictogram = "☕";
+                  break;
+                case "Domestic travel without reservation on the assigned destination.":
+                  service.name = "Belföldi utazás foglalás nélkül";
+                  pictogram = "🆓";
+                  break;
+                case "Train does not wait for connection":
+                  service.name = "Vonat nem vár csatlakozásra";
+                  pictogram = "⏳";
+                  break;
+                case "Suburban train":
+                  service.name = "Elővárosi vonat";
+                  pictogram = "🚉";
+                  break;
+                case "Train without a conductor, boarding only with a valid ticket.":
+                  service.name = "Vonat kalauz nélkül, csak érvényes jeggyel lehet felszállni";
+                  pictogram = "🚫";
+                  break;
+                case "Air conditioned vehicle":
+                  service.name = "Légkondicionált jármű";
+                  pictogram = "❄️";
+                  break;
+                case "Bicycles can be transported in wagons marked with a pictogram (up to 4 per wagon).":
+                  service.name = "Kerékpárok szállítása a jelképpel ellátott kocsikban (kocsinként legfeljebb 4 kerékpár).";
+                  pictogram = "🚲";
+                  break;
+                case "With designated car for bicycle, suitable also for special bicycles. (For more than 6 bicycles, its recommend to notifying us in advance.)":
+                  service.name = "Kijelölt kerékpárkocsi, amely alkalmas speciális kerékpárok számára is. (Több mint 6 kerékpár esetén javasolt előre jelezni.)";
+                  pictogram = "🚴";
+                  break;
+                case "Restaurant car":
+                  service.name = "Étkezőkocsi";
+                  pictogram = "🍽️";
+                  break;
+                case "Direct coach(es)":
+                  service.name = "Közvetlen járat";
+                  pictogram = "🚌";
+                  break;
+                case "Bicycles can be transported in the designated place. Booking a bicycle space is mandatory.":
+                  service.name = "Kerékpárok szállítása a kijelölt helyen. Kerékpár hely foglalása kötelező.";
+                  pictogram = "🚴";
+                  break;
+                case "In case of cross border travel international ticket is required for the entire journey.":
+                  service.name = "Határon átnyúló utazás esetén nemzetközi jegy szükséges az egész útra.";
+                  pictogram = "🌍";
+                  break;
+                case "Seat reservation can be made":
+                  service.name = "Helyjegy foglalható";
+                  pictogram = "🪑";
+                  break;
+                default:
+                  pictogram = "ℹ️";
+                  break;
+              }
+              serviceDetails.set(service.name, pictogram);
+            });
+            services = "<br><b>Szolgáltatás adatok:</b><br>"
+            for (const [key, value] of serviceDetails) {
+              services += `<span>${value} ${key}</span><br>`;
+            }
+          }
+
+          marker.bindPopup(`
+            <span style="font-size:22px;">🚄</span> <b>${vehicle.trip.tripShortName}</b><br>
+            ${vehicle.trip.tripHeadsign}<br><br>
+            <b>Jármű adatok:</b><br>
+            <span title="UIC" style="font-size:18px;">🆔</span> UIC: ${uic}<br>
+            <span title="Mozgáskorlátozottak számára elérhető" style="font-size:18px;">♿</span> Mozgáskorlátozott felszállás: ${vehicle.trip.wheelchairAccessible == "POSSIBLE" ? 'Támogatott' : 'Nem támogatott'}<br>
+            <span title="Bicikli szállítás engedélyezett" style="font-size:18px;">🚲</span> Bicikli szállítás: ${vehicle.trip.bikesAllowed == "ALLOWED" ? 'Támogatott' : 'Nem támogatott'}<br>
+            <span style="font-size:18px;">💨</span> Sebesség: ${speed} km/h<br>
+            <span style="font-size:18px;">⏰</span> Késés: ${delayText}<br>
+            <span style="font-size:18px;">🗓️</span> Utolsó frissítés: ${new Date(vehicle.lastUpdated * 1000).toLocaleString("hu-HU", { timeZone: "Europe/Budapest" })}<br>
+            ${services}
+            <br>
+            <b>Állomások:</b><br>
+            ${table}
+          `);
+          markers.push(marker);
+        });
+      } catch (err) {
+        console.error("Hiba történt az adatok betöltésekor:", err);
+      }
+    }
+
+    function loadData() {
+      getMetrics().then(metrics => {
+        if (metrics) {
+          loadMetrics(metrics);
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const header = document.getElementById('header');
+        if (header) header.style.opacity = '0';
+      }, 1000);
+    });
+
+    loadData();
+    setInterval(loadData, 5000);
+  </script>
+</body>
+</html>
