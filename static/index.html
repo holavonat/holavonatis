@@ -2,18 +2,90 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8" />
-  <title>Hol a vonat?</title>
-  <meta property="og:title" content="Hol a vonat?" />
-  <meta property="og:description" content="Valós idejű magyar vonatkövetés térképen. Nézd meg, hol járnak a vonatok most!" />
+  <title>Hol a vonat? - Valós idejű vonatkövetés Magyarországon | Live Train Tracking</title>
+  <meta name="description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most! Késések, útvonalak, állomások egy helyen. MÁV vonatok követése élőben." />
+  <meta name="keywords" content="vonat követés, MÁV, vonat térkép, vonat késés, magyar vonatok, train tracking, vonatmenetrend, vonat helyzet, holavonat" />
+  <meta name="author" content="Hol a vonat?" />
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="Hungarian" />
+  
+  <meta property="og:title" content="Hol a vonat? - Valós idejű vonatkövetés Magyarországon" />
+  <meta property="og:description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most! Késések, útvonalak, állomások egy helyen." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://holavonat.is/" />
+  <meta property="og:image" content="https://holavonat.is/android-chrome-512x512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="Hol a vonat?" />
   <meta property="og:locale" content="hu_HU" />
+  <meta property="og:site_name" content="Hol a vonat?" />
+  
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hol a vonat? - Valós idejű vonatkövetés" />
+  <meta name="twitter:description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most!" />
+  <meta name="twitter:image" content="https://holavonat.is/android-chrome-512x512.png" />
+  <meta name="twitter:image:alt" content="Hol a vonat?" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="canonical" href="https://holavonat.is/" />
+  <link rel="author" href="/humans.txt" />
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hol a vonat?",
+    "description": "Valós idejű vonatkövetési térkép. MÁV vonatok élő követése, késések, útvonalak.",
+    "url": "https://holavonat.is/",
+    "applicationCategory": "Transportation",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "HUF"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Hol a vonat?",
+      "url": "https://holavonat.is/"
+    },
+    "inLanguage": "hu",
+    "audience": {
+      "@type": "Audience",
+      "geographicArea": {
+        "@type": "Country",
+        "name": "Hungary"
+      }
+    }
+  }
+  </script>
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#ffffff">
+  
   <link rel="dns-prefetch" href="//unpkg.com">
   <link rel="dns-prefetch" href="//cdn.holavonat.is">
   <link rel="dns-prefetch" href="//a.tile.openstreetmap.org">
   <link rel="dns-prefetch" href="//b.tile.openstreetmap.org">
   <link rel="dns-prefetch" href="//c.tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="//tiles.openrailwaymap.org">
+  
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin>
+  <link rel="preconnect" href="https://tiles.openrailwaymap.org" crossorigin>
+  
+  <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style" crossorigin>
+  <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin>
+  
+  <link rel="prefetch" href="/android-chrome-192x192.png">
+  <link rel="prefetch" href="/android-chrome-512x512.png">
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
      crossorigin=""/>
@@ -45,6 +117,13 @@
       font-weight: bold;
       transition: opacity 1s ease;
       opacity: 1;
+      z-index: 1000;
+    }
+    
+    #header h1 {
+      margin: 0;
+      font-size: inherit;
+      font-weight: inherit;
     }
     
     #disclaimer {
@@ -197,8 +276,8 @@
 
     Mirrors: <br>
     <a href="https://holavonat.github.io/instances" target="_blank" rel="noopener">holavonat.github.io/instances</a><br>
-    Nyers adatok (CORS *): <br>
-    <a href="https://cdn.holavonat.is/train_data_v2.json" target="_blank" rel="noopener">cdn.holavonat.is/train_data_v2.json</a><br><br>
+    Forráskód: <br>
+    <a href="https://github.com/holavonat/holavonatis" target="_blank" rel="noopener">github.com/holavonat/holavonatis</a><br><br>
     Email: <a href="mailto:j@holavonat.is">j@holavonat.is</a>
   </div>
   <div id="stale-warning" style="display:none;position:absolute;top:0;left:0;width:100%;background:rgba(255,0,0,0.85);color:white;text-align:center;padding:10px;z-index:2000;font-size:16px;">
@@ -235,7 +314,39 @@
     let markers = [];
     let lastEtag = null;
     let lastMetrics = null;
+    let routePolyline = null;
 
+    function decodePolyline(encoded) {
+      if (!encoded || encoded.length === 0) return [];
+      
+      const coordinates = [];
+      const len = encoded.length;
+      let index = 0;
+      let lat = 0;
+      let lng = 0;
+      
+      const decodeValue = () => {
+        let result = 0;
+        let shift = 0;
+        let b;
+        
+        do {
+          b = encoded.charCodeAt(index++) - 63;
+          result |= (b & 0x1f) << shift;
+          shift += 5;
+        } while (b >= 0x20 && index < len);
+        
+        return (result & 1) ? ~(result >> 1) : (result >> 1);
+      };
+      
+      while (index < len) {
+        lat += decodeValue();
+        lng += decodeValue();        
+        coordinates.push([lat * 1e-5, lng * 1e-5]);
+      }
+      
+      return coordinates;
+    }
 
     function delayColor(min) {
       if (min >= 60) return '#ff0000';      
@@ -288,16 +399,20 @@
     async function getMetrics() {
       try {
         const rnd = Date.now();
-        const headResp = await fetch(`https://cdn.holavonat.is/train_data_v2.json?_=${rnd}`, { method: "HEAD" });
+        const headResp = await fetch(`https://cdn.holavonat.is/train_data_v3.json?_=${rnd}`, { method: "HEAD" });
+         if (!headResp.ok) {
+            throw new Error(`HTTP error! status: ${headResp.status}`);
+        }
+
         const etag = headResp.headers.get('ETag');
         if (etag && etag === lastEtag && lastMetrics) {
           return;
         }
-        const response = await fetch(`https://cdn.holavonat.is/train_data_v2.json?_=${rnd}`, {});
+
+        const response = await fetch(`https://cdn.holavonat.is/train_data_v3.json?_=${rnd}`, {});
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-
 
         const data = await response.json();
         lastEtag = etag;
@@ -340,8 +455,63 @@
             icon: createMarkerIcon(color, heading)
           }).addTo(map);
 
-          marker.bindTooltip(`${vehicle.trip.tripShortName} (${vehicle.vehicleId}) (${speed} km/h) - ${delayText}`, {
+          let vehicleName = "";
+          let vehicleLogo = "";
+          switch (vehicle.trip.route.mode) {
+          case "RAIL":
+            vehicleName = vehicle.trip.tripShortName || "Ismeretlen vonat";
+            vehicleLogo = "🚄";
+            break;
+          case "TRAM":
+            vehicleName = vehicle.trip.route.shortName || "Ismeretlen villamos";
+            vehicleLogo = "🚋";
+            break;
+          case "SUBURBAN_RAILWAY":
+            vehicleName = vehicle.trip.tripShortName || "Ismeretlen elővárosi vonat";
+            vehicleLogo = "🚉";
+            break;
+          case "TRAMTRAIN":
+            vehicleName = vehicle.trip.tripShortName || "Ismeretlen villamos vonat";
+            vehicleLogo = "🚊";
+            break;
+          default:
+            vehicleName = "Ismeretlen jármű";
+            vehicleLogo = "❓";
+            break;
+          }
+
+          const id = vehicle.vehicleId.split(":")[1];
+          const match = id.match(/^(\d{2})(\d{2})(\d{4})(\d{3})(\d)$/);
+          var uic = '';
+          if (match) {
+            uic = `${match[1]} ${match[2]} ${match[3]} ${match[4]}-${match[5]}`;
+          } else {
+            uic = id;
+          }
+ 
+          marker.bindTooltip(`${vehicleName} (${uic}) (${speed} km/h) - ${delayText}`, {
             direction: "top"
+          });
+
+          var routePolyline = null;
+          
+          marker.on('mouseover', (e) => {
+            if (vehicle.trip.tripGeometry && vehicle.trip.tripGeometry.points && !routePolyline) {
+              const decodedPoints = decodePolyline(vehicle.trip.tripGeometry.points);
+              routePolyline = L.polyline(decodedPoints, {
+                color: '#f41804',
+                weight: 5,
+                opacity: 1,
+                lineJoin: 'round'
+              }).addTo(map);
+            }
+          });
+
+          marker.on('mouseout', (e) => {
+            if (routePolyline && !marker.isPopupOpen()) {
+              routePolyline.remove();
+              routePolyline = null;
+            }
           });
 
           let table = '<div class="popup-table-container"><table><tr><th>Állomás</th><th>Érk.</th><th>Ind.</th><th>Vágány</th></tr>';
@@ -366,18 +536,7 @@
               <td>${track}</td>
             </tr>`;
           });
-          table += '</table></div>';
-
-          
-
-          const id = vehicle.vehicleId.split(":")[1];
-          const match = id.match(/^(\d{2})(\d{2})(\d{4})(\d{3})(\d)$/);
-          var uic = '';
-          if (match) {
-            uic = `${match[1]} ${match[2]} ${match[3]} ${match[4]}-${match[5]}`;
-          } else {
-            uic = id;
-          }          
+          table += '</table></div>';          
 
           var services = "";
           const serviceDetails = new Map();
@@ -481,6 +640,14 @@
                   service.name = "Helyjegy foglalható";
                   pictogram = "🪑";
                   break;
+                case "In domestic traffic seat Reservation compulsory, seat Reservation in international traffic can be made.":
+                  service.name = "Belföldi forgalomban helyjegy kötelező, nemzetközi forgalomban helyjegy foglalható.";
+                  pictogram = "🛤️";
+                  break;
+                case "A cabin or places reserved for disabled person":
+                  service.name = "Mozgáskorlátozottak számára fenntartott fülke vagy helyek";
+                  pictogram = "♿";
+                  break;
                 default:
                   pictogram = "ℹ️";
                   break;
@@ -494,7 +661,7 @@
           }
 
           marker.bindPopup(`
-            <span style="font-size:22px;">🚄</span> <b>${vehicle.trip.tripShortName}</b><br>
+            <span style="font-size:22px;">${vehicleLogo}</span> <b>${vehicleName}</b><br>
             ${vehicle.trip.tripHeadsign}<br><br>
             <b>Jármű adatok:</b><br>
             <span title="UIC" style="font-size:18px;">🆔</span> UIC: ${uic}<br>

@@ -98,6 +98,33 @@ Network:
 
 For a complete example, see [config_example.yaml](config_example.yaml).
 
+## Live Data Source
+
+**Currently Available**: A live data feed is accessible at https://cdn.holavonat.is/train_data_v3.json
+
+### Data Access
+- **CORS Policy**: Unrestricted (`*`) - accessible from any domain
+- **Format**: JSON (following the v3 schema)
+- **Update Frequency**: Real-time updates (typically every 60 seconds)
+- **Public Use**: Available for third-party applications and research
+
+### Important Disclaimers
+
+⚠️ **Data Reliability Warning**: While this data source is currently available for public use, please be aware that:
+
+- **No Service Guarantee**: The data feed may become unavailable at any time without notice
+- **Data Accuracy**: The authors cannot guarantee the accuracy, completeness, or timeliness of the data
+- **No Liability**: Users of this data source assume all responsibility for its use
+- **Third-Party Risk**: The underlying data comes from an undocumented API and is subject to the same risks outlined in the main disclaimer
+
+### Usage Recommendations
+- Implement proper error handling for data unavailability
+- Cache data locally when possible to reduce dependency
+- Consider this a convenience service, not a guaranteed API
+- Always have fallback mechanisms in your applications
+
+For schema information, see [internal/api/schema.go](internal/api/schema.go).
+
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). This means:

@@ -1,0 +1,22 @@
+/* TEAM */
+Developer: Hol a vonat? Team
+Contact: j@holavonat.is
+Location: Hungary
+
+/* SITE */
+Last update: 2025/07/02
+Language: Hungarian / Magyar
+Standards: HTML5, CSS3, JavaScript ES6
+Components: Leaflet.js, OpenStreetMap, OpenRailwayMap
+
+/* PURPOSE */
+Real-time train tracking for Hungary
+Live MÁV train positions and delays
+Interactive map interface
+Open source project
+
+/* THANKS */
+OpenStreetMap contributors
+OpenRailwayMap project
+Leaflet.js community
+MÁV (Hungarian State Railways) for data
