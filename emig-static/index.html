@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hol a vonat? - Valós idejű vonatkövetés Magyarországon | Live Train Tracking</title>
+  <meta name="description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most! Késések, útvonalak, állomások egy helyen. MÁV vonatok követése élőben." />
+  <meta name="keywords" content="vonat követés, MÁV, vonat térkép, vonat késés, magyar vonatok, train tracking, vonatmenetrend, vonat helyzet, holavonat" />
+  <meta name="author" content="Hol a vonat?" />
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="Hungarian" />
+
+  <meta property="og:title" content="Hol a vonat? - Valós idejű vonatkövetés Magyarországon" />
+  <meta property="og:description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most! Késések, útvonalak, állomások egy helyen." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://holavonat.is/" />
+  <meta property="og:image" content="https://holavonat.is/android-chrome-512x512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:alt" content="Hol a vonat?" />
+  <meta property="og:locale" content="hu_HU" />
+  <meta property="og:site_name" content="Hol a vonat?" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hol a vonat? - Valós idejű vonatkövetés" />
+  <meta name="twitter:description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most!" />
+  <meta name="twitter:image" content="https://holavonat.is/android-chrome-512x512.png" />
+  <meta name="twitter:image:alt" content="Hol a vonat?" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="canonical" href="https://holavonat.is/" />
+  <link rel="author" href="/humans.txt" />
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Hol a vonat?",
+    "description": "Valós idejű vonatkövetési térkép. MÁV vonatok élő követése, késések, útvonalak.",
+    "url": "https://holavonat.is/",
+    "applicationCategory": "Transportation",
+    "operatingSystem": "Web Browser",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "HUF"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Hol a vonat?",
+      "url": "https://holavonat.is/"
+    },
+    "inLanguage": "hu",
+    "audience": {
+      "@type": "Audience",
+      "geographicArea": {
+        "@type": "Country",
+        "name": "Hungary"
+      }
+    }
+  }
+  </script>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#ffffff">
+
+  <link rel="dns-prefetch" href="//unpkg.com">
+  <link rel="dns-prefetch" href="//cdn.holavonat.is">
+  <link rel="dns-prefetch" href="//a.tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="//b.tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="//c.tile.openstreetmap.org">
+  <link rel="dns-prefetch" href="//tiles.openrailwaymap.org">
+
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin>
+  <link rel="preconnect" href="https://tiles.openrailwaymap.org" crossorigin>
+
+  <link rel="prefetch" href="/android-chrome-192x192.png">
+  <link rel="prefetch" href="/android-chrome-512x512.png">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+  </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    #header {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      transition: opacity 1s ease;
+      opacity: 1;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    #header h1 {
+      margin: 0;
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
+    .passed { background-color: #c8e6c9; }
+    .delayed { color: red; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 12px;
+    }
+    td, th {
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    .marker-container {
+      position: relative;
+      width: 26px;
+      height: 26px;
+    }
+
+    .triangle-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 26px;
+      height: 26px;
+      transform-origin: center center;
+      z-index: 0;
+    }
+
+    .triangle {
+      position: absolute;
+      top: -8px;
+      left: 3px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 20px solid black;
+    }
+
+    .circle {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      background: var(--color);
+      border: 2px solid black;
+      transform-origin: center center;
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .emig-square {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      box-sizing: border-box;
+      background: var(--color);
+      border: 3px solid #0033a0;
+      transform-origin: center center;
+      border-radius: 3px;
+      z-index: 1;
+    }
+
+    .popup-table-container {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 5px;
+      max-width: 60vw;
+    }
+
+    .legend {
+      background: rgba(255,255,255,0.7);
+      padding: 6px;
+      line-height: 1.25;
+      color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+    .legend .lrow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-section { margin-bottom: 5px; }
+    .legend-section b { display: block; }
+
+    .legend i {
+      width: 14px;
+      height: 14px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      opacity: 0.85;
+    }
+
+    .legend i.round {
+      background: #fff;
+      border: 2px solid #000;
+    }
+
+    .legend i.square {
+      background: #fff;
+      border: 2px solid #0033a0;
+      border-radius: 2px;
+    }
+
+    .legend i.tri {
+      background: none;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 11px solid #333;
+      border-radius: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .tri-marker {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 0;
+      height: 0;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-bottom: 22px solid var(--color);
+      filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px #000);
+      z-index: 1;
+    }
+    .tri-marker.followed {
+      filter: drop-shadow(0 0 3px #ffd400) drop-shadow(0 0 2px #ffd400);
+    }
+
+    #tl {
+      position: absolute;
+      top: 10px;
+      left: 50px;
+      z-index: 1100;
+      width: 300px;
+      max-width: calc(100vw - 60px);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    #tl #search,
+    #tl #search-results,
+    #tl #follow-toggle,
+    #tl #follow-panel,
+    #tl #stale-warning { pointer-events: auto; }
+    #searchbox {
+      position: relative;
+      width: 100%;
+    }
+    #search {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      font-size: 14px;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+    }
+    #search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      z-index: 5;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      max-height: 50vh;
+      overflow-y: auto;
+    }
+    .search-item {
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #eee;
+    }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:hover { background: #eef3ff; }
+    .search-badge { display: inline-block; width: 14px; color: #0033a0; }
+    .search-empty { padding: 8px 10px; color: #888; font-size: 13px; }
+
+    .circle.followed,
+    .emig-square.followed {
+      box-shadow: 0 0 0 3px #ffd400, 0 0 9px 2px rgba(255, 212, 0, 0.95);
+    }
+
+    #follow-box {
+      position: relative;
+      width: 100%;
+      text-align: left;
+      pointer-events: none;
+    }
+    #follow-toggle,
+    #follow-panel { pointer-events: auto; }
+    #follow-toggle {
+      padding: 8px 10px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+    }
+    #follow-panel {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      z-index: 5;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      max-height: 50vh;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .follow-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-bottom: 1px solid #eee;
+    }
+    .follow-item:last-child { border-bottom: none; }
+    .follow-item .lbl { flex: 1; cursor: pointer; }
+    .follow-item .lbl:hover { color: #0033a0; }
+    .follow-item.stale .lbl { color: #999; cursor: default; }
+    .follow-item .rm {
+      border: none;
+      background: none;
+      color: #c00;
+      font-weight: bold;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .follow-empty { padding: 8px 10px; color: #888; font-size: 13px; }
+    .follow-btn {
+      display: inline-block;
+      margin-bottom: 6px;
+      padding: 5px 10px;
+      border: 1px solid #0033a0;
+      border-radius: 5px;
+      background: #fff;
+      color: #0033a0;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .follow-btn.on { background: #ffd400; border-color: #c9a800; color: #333; }
+
+    .lang-switch {
+      margin-bottom: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .lang-btn {
+      padding: 3px 9px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .lang-btn.active { background: #0033a0; color: #fff; border-color: #0033a0; }
+    .orm-btn { margin-left: 4px; }
+    .orm-btn.on { background: #0b8043; color: #fff; border-color: #0b8043; }
+
+    #lang-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .lang-popup-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 24px;
+      max-width: 360px;
+      width: calc(100% - 40px);
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    .lang-popup-card p { margin: 0 0 18px; font-size: 16px; color: #222; }
+    .lang-popup-actions { display: flex; gap: 10px; justify-content: center; }
+    .lang-popup-actions button {
+      padding: 9px 22px;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      border: 1px solid #aaa;
+    }
+    #lang-yes { background: #0033a0; color: #fff; border-color: #0033a0; }
+    #lang-no { background: #fff; color: #333; }
+
+    #stale-warning a { color: #fff; text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      #tl {
+        right: 10px;
+        width: auto;
+        max-width: none;
+      }
+    }
+
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1500;
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      max-height: 60vh;
+      transform: translateY(110%);
+      transition: transform 0.25s ease, max-height 0.2s ease;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .sheet.open { transform: translateY(0); }
+    .sheet.full { max-height: calc(100dvh - 8px); }
+    .sheet[hidden] { display: none; }
+    .sheet-head {
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 2px 6px 6px;
+      background: inherit;
+      border-bottom: 1px solid #eee;
+    }
+    .sheet-grab {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 5px;
+      border-radius: 3px;
+      background: #ccc;
+    }
+    .sheet-title {
+      flex: 1;
+      font-weight: bold;
+      font-size: 14px;
+      margin-top: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .sheet-btn {
+      min-width: 44px;
+      min-height: 44px;
+      margin-top: 6px;
+      border: none;
+      background: none;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      color: #333;
+    }
+    .sheet-body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px 14px 16px;
+      flex: 1;
+    }
+    .sheet-body .popup-table-container { max-width: 100%; max-height: none; overflow: visible; margin-top: 0; }
+    .sheet-body table { font-size: 13px; }
+    .popup-table-container thead th {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+      box-shadow: inset 0 -1px 0 #bbb;
+    }
+
+    .sheet-body .d-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .sheet-body .d-logo { font-size: 22px; }
+    .sheet-body .d-sub { color: #666; font-size: 13px; margin: 3px 0 0; }
+    .sheet-body .sect {
+      border-top: 1px solid #e6e6e6;
+      margin-top: 14px;
+      padding-top: 12px;
+    }
+    .sheet-body .sect-h {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #8a8a8a;
+      margin: 0 0 8px;
+    }
+    .sheet-body .d-row {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      margin: 4px 0;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .sheet-body .d-row .ic { width: 22px; flex: 0 0 auto; text-align: center; font-size: 16px; }
+    .sheet-body .d-muted { color: #777; font-size: 12px; }
+    .sheet-body .d-badge {
+      display: inline-block;
+      background: #0033a0;
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .stop-link {
+      color: #0033a0;
+      cursor: pointer;
+      text-decoration: underline dotted;
+    }
+    .stop-link:hover { text-decoration: underline; }
+
+    .station-pin {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #8e24aa;
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 2px #8e24aa, 0 0 8px 2px rgba(142, 36, 170, 0.6);
+      animation: stationPulse 1.2s ease-out infinite;
+    }
+    @keyframes stationPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(142, 36, 170, 0.55), 0 0 0 2px #8e24aa; }
+      70%  { box-shadow: 0 0 0 18px rgba(142, 36, 170, 0), 0 0 0 2px #8e24aa; }
+      100% { box-shadow: 0 0 0 0 rgba(142, 36, 170, 0), 0 0 0 2px #8e24aa; }
+    }
+    .leaflet-tooltip.station-tip {
+      font-weight: bold;
+      color: #6a1b9a;
+      border-color: #8e24aa;
+    }
+    @media (min-width: 601px) {
+      .sheet {
+        left: auto;
+        right: 14px;
+        bottom: 14px;
+        width: 380px;
+        border-radius: 14px;
+        max-height: 70vh;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+      }
+      .sheet.full { max-height: calc(100dvh - 28px); }
+      .sheet-grab { display: none; }
+      .sheet-title { margin-top: 6px; }
+    }
+
+    .legend-fab {
+      display: none;
+      width: 44px;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid #aaa;
+      background: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+    }
+    .legend.collapsed {
+      background: none;
+      box-shadow: none;
+      padding: 0;
+    }
+    .legend.collapsed .legend-fab { display: flex; }
+    .legend.collapsed .legend-body { display: none; }
+    .legend-collapse {
+      float: right;
+      margin: -2px -2px 0 6px;
+      border: none;
+      background: none;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      min-width: 28px;
+      min-height: 28px;
+      color: #555;
+    }
+
+    @media (max-width: 600px) {
+      .ftxt { display: none; }
+      #search { padding: 11px 12px; font-size: 15px; }
+      .lang-btn { padding: 8px 12px; }
+    }
+
+    .corner-fab {
+      position: fixed;
+      left: 10px;
+      bottom: calc(env(safe-area-inset-bottom) + 24px);
+      z-index: 1100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid #aaa;
+      background: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+    }
+    .cornerbox {
+      position: fixed;
+      left: 10px;
+      bottom: calc(env(safe-area-inset-bottom) + 76px);
+      z-index: 1101;
+      max-width: min(320px, calc(100vw - 20px));
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #333;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    }
+    .cornerbox[hidden] { display: none; }
+    .corner-close {
+      float: right;
+      margin: -4px -4px 0 8px;
+      border: none;
+      background: none;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      min-width: 28px;
+      min-height: 28px;
+      color: #555;
+    }
+
+    #stale-warning {
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(200, 30, 30, 0.85);
+      color: #fff;
+      border-radius: 8px;
+      padding: 8px 34px 8px 12px;
+      font-size: 13px;
+      line-height: 1.35;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+    #stale-warning.fading { opacity: 0; }
+    #stale-warning[hidden] { display: none; }
+    #stale-warning a { color: #fff; text-decoration: underline; }
+    .stale-close {
+      position: absolute;
+      top: 3px;
+      right: 4px;
+      min-width: 32px;
+      min-height: 32px;
+      border: none;
+      background: none;
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">Hol a vonat?</div>
+  <div id="map"></div>
+  <div id="tl">
+    <div id="searchbox">
+      <input id="search" type="text" placeholder="🔍 Vonat keresése (szám, név, állomás, UIC)" autocomplete="off" aria-label="Vonat keresése" />
+      <div id="search-results" style="display:none;"></div>
+    </div>
+    <div id="follow-box">
+      <button id="follow-toggle" type="button" title="Követett vonatok">★ Követett (0)</button>
+      <div id="follow-panel" style="display:none;"></div>
+    </div>
+    <div id="stale-warning" role="alert" aria-live="polite" hidden></div>
+  </div>
+  <button id="about-fab" type="button" class="corner-fab" title="Információ" aria-label="Információ">?</button>
+  <div id="about-box" class="cornerbox" hidden></div>
+
+  <div id="details" class="sheet" role="dialog" aria-modal="false" aria-labelledby="sheet-title" hidden>
+    <div class="sheet-grab" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <span id="sheet-title" class="sheet-title"></span>
+      <button id="sheet-expand" class="sheet-btn" type="button">⤢</button>
+      <button id="sheet-close" class="sheet-btn" type="button">✕</button>
+    </div>
+    <div id="sheet-body" class="sheet-body"></div>
+  </div>
+
+  <div id="lang-popup" style="display:none;">
+    <div class="lang-popup-card" role="dialog" aria-modal="true">
+      <p id="lang-popup-msg">Do you want to switch to English?</p>
+      <div class="lang-popup-actions">
+        <button id="lang-yes" type="button">English</button>
+        <button id="lang-no" type="button">Magyar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const I18N = {
+      hu: {
+        title: "Hol a vonat? - Valós idejű vonatkövetés Magyarországon | Live Train Tracking",
+        headerTitle: "Hol a vonat?",
+        legendSources: "Források",
+        legendTrainBoth: "vonat (EMMA + EMIG)",
+        legendEmigOnly: "csak MÁV EMIG",
+        legendTramHev: "HÉV / villamos",
+        legendColors: "Színek jelentése",
+        delay0: "0-4 perc késés",
+        delay5: "5-14 perc késés",
+        delay15: "15-20 perc késés",
+        delay21: "21-60 perc késés",
+        delay60: "60+ perc késés",
+        delayUnknown: "állomásozó / áthaladó (nincs késésadat)",
+        emmaUpdated: "EMMA frissítve:",
+        emigUpdated: "EMIG frissítve:",
+        searchPlaceholder: "🔍 Vonat keresése (szám, név, állomás, UIC)",
+        searchAria: "Vonat keresése",
+        noResults: "Nincs találat",
+        followLabel: "Követett",
+        followToggleTitle: "Követett vonatok",
+        followBtnOn: "★ Követés leállítása",
+        followBtnOff: "☆ Vonat követése",
+        followEmpty: "Nincs követett vonat. Nyiss meg egy vonatot, és kattints a „Vonat követése” gombra a részletek tetején.",
+        followJump: "Ugrás a vonathoz",
+        followNoData: "Jelenleg nincs élő adat erről a vonatról",
+        followRemove: "Követés törlése",
+        staleEmma: "Az EMMA (részletes) adatok elavultak lehetnek, utolsó frissítés: {t}.",
+        staleEmig: "A MÁV EMIG adatok elavultak lehetnek, utolsó frissítés: {t}.",
+        staleNote: "Az adatgyűjtés nem hivatalos, „best-effort” módon történik, ezért a frissesség időnként eltérhet. Ha a probléma tartós, kérjük írjon a <a href='mailto:j@holavonat.is'>j@holavonat.is</a> címre.",
+        vehicleDetails: "Jármű adatok:",
+        wheelchair: "Mozgáskorlátozott felszállás:",
+        bicycle: "Bicikli szállítás:",
+        supported: "Támogatott",
+        notSupported: "Nem támogatott",
+        speed: "Sebesség:",
+        delayEmig: "Késés (EMIG):",
+        delayEmma: "Késés (EMMA):",
+        delayDiff: "Eltérés (EMIG - EMMA):",
+        delaySingle: "Késés:",
+        minUnit: "perc",
+        minLate: "perc késés",
+        minEarly: "perc korábban",
+        onTime: "nincs késés",
+        unknownDelay: "ismeretlen késés",
+        lastUpdateEmma: "Utolsó frissítés (EMMA):",
+        servicesHeader: "Szolgáltatás adatok:",
+        stations: "Állomások:",
+        thStation: "Állomás",
+        thArr: "Érk.",
+        thDep: "Ind.",
+        thTrack: "Vágány",
+        emigOfficial: "MÁV EMIG (hivatalos)",
+        trainNo: "Vonatszám:",
+        trainId: "Vonatazonosító:",
+        emigQueried: "EMIG lekérdezés:",
+        emigSquareNote: "A négyzet a hivatalos MÁV pozíciót mutatja.",
+        emigSource: "Forrás: MÁV EMIG (hivatalos adat)",
+        passenger: "Személyvonat",
+        freight: "Tehervonat",
+        inTransit: "Áthaladó vonat",
+        stationing: "Állomásozó vonat",
+        unknownTrain: "Ismeretlen vonat",
+        unknownTram: "Ismeretlen villamos",
+        unknownSuburban: "Ismeretlen elővárosi vonat",
+        unknownTramTrain: "Ismeretlen villamos vonat",
+        unknownVehicle: "Ismeretlen jármű",
+        discMirrors: "Tükrök:",
+        discSource: "Forráskód:",
+        discEmail: "E-mail:",
+        langPrompt: "Szeretnél átváltani angolra?",
+        detailsClose: "Részletek bezárása",
+        detailsExpand: "Teljes nézet",
+        detailsCollapse: "Kisebb nézet",
+        legendOpenLabel: "Jelmagyarázat",
+        legendCloseLabel: "Jelmagyarázat bezárása",
+        legendRailLayer: "OpenRailwayMap",
+        aboutLabel: "Információ",
+        closeLabel: "Bezárás"
+      },
+      en: {
+        title: "Where's the train? - Live train tracking in Hungary",
+        headerTitle: "Where's the train?",
+        legendSources: "Sources",
+        legendTrainBoth: "train (EMMA + EMIG)",
+        legendEmigOnly: "MÁV EMIG only",
+        legendTramHev: "HÉV / tram",
+        legendColors: "Delay colours",
+        delay0: "0-4 min delay",
+        delay5: "5-14 min delay",
+        delay15: "15-20 min delay",
+        delay21: "21-60 min delay",
+        delay60: "60+ min delay",
+        delayUnknown: "stationing / in transit (no delay data)",
+        emmaUpdated: "EMMA updated:",
+        emigUpdated: "EMIG updated:",
+        searchPlaceholder: "🔍 Search train (number, name, station, UIC)",
+        searchAria: "Search train",
+        noResults: "No results",
+        followLabel: "Followed",
+        followToggleTitle: "Followed trains",
+        followBtnOn: "★ Unfollow",
+        followBtnOff: "☆ Follow train",
+        followEmpty: "No followed trains. Open a train and click “Follow train” at the top of the details.",
+        followJump: "Jump to train",
+        followNoData: "No live data for this train right now",
+        followRemove: "Remove follow",
+        staleEmma: "EMMA (detailed) data may be out of date, last update: {t}.",
+        staleEmig: "MÁV EMIG data may be out of date, last update: {t}.",
+        staleNote: "Data is collected on a best-effort basis through an unofficial channel, so freshness may occasionally be affected. If the problem persists, please email <a href='mailto:j@holavonat.is'>j@holavonat.is</a>.",
+        vehicleDetails: "Vehicle details:",
+        wheelchair: "Wheelchair boarding:",
+        bicycle: "Bicycle transport:",
+        supported: "Supported",
+        notSupported: "Not supported",
+        speed: "Speed:",
+        delayEmig: "Delay (EMIG):",
+        delayEmma: "Delay (EMMA):",
+        delayDiff: "Difference (EMIG - EMMA):",
+        delaySingle: "Delay:",
+        minUnit: "min",
+        minLate: "min late",
+        minEarly: "min early",
+        onTime: "on time",
+        unknownDelay: "unknown delay",
+        lastUpdateEmma: "Last update (EMMA):",
+        servicesHeader: "Services:",
+        stations: "Stations:",
+        thStation: "Station",
+        thArr: "Arr.",
+        thDep: "Dep.",
+        thTrack: "Track",
+        emigOfficial: "MÁV EMIG (official)",
+        trainNo: "Train no.:",
+        trainId: "Train ID:",
+        emigQueried: "EMIG queried:",
+        emigSquareNote: "The square shows the official MÁV position.",
+        emigSource: "Source: MÁV EMIG (official data)",
+        passenger: "Passenger train",
+        freight: "Freight train",
+        inTransit: "In-transit train",
+        stationing: "Stationing train",
+        unknownTrain: "Unknown train",
+        unknownTram: "Unknown tram",
+        unknownSuburban: "Unknown suburban train",
+        unknownTramTrain: "Unknown tram-train",
+        unknownVehicle: "Unknown vehicle",
+        discMirrors: "Mirrors:",
+        discSource: "Source code:",
+        discEmail: "Email:",
+        langPrompt: "Do you want to switch to English?",
+        detailsClose: "Close details",
+        detailsExpand: "Expand",
+        detailsCollapse: "Collapse",
+        legendOpenLabel: "Legend",
+        legendCloseLabel: "Close legend",
+        legendRailLayer: "OpenRailwayMap",
+        aboutLabel: "About",
+        closeLabel: "Close"
+      }
+    };
+    const LANG_STORE_KEY = 'holavonat_lang';
+    function storedLang() { try { return localStorage.getItem(LANG_STORE_KEY); } catch (e) { return null; } }
+    let lang = storedLang() || 'hu';
+    function t(k) { return (I18N[lang] && I18N[lang][k]) || I18N.hu[k] || k; }
+    function dateLocale() { return lang === 'en' ? 'en-GB' : 'hu-HU'; }
+
+    function setLang(l) {
+      if (l !== 'hu' && l !== 'en') return;
+      lang = l;
+      try { localStorage.setItem(LANG_STORE_KEY, l); } catch (e) {  }
+      applyI18n();
+    }
+
+    function applyI18n() {
+      try { document.documentElement.lang = lang; } catch (e) {}
+      document.title = t('title');
+      const header = document.getElementById('header');
+      if (header) header.textContent = t('headerTitle');
+      const search = document.getElementById('search');
+      if (search) { search.placeholder = t('searchPlaceholder'); search.setAttribute('aria-label', t('searchAria')); }
+      const ft = document.getElementById('follow-toggle');
+      if (ft) ft.title = t('followToggleTitle');
+      renderLegend();
+      renderDisclaimer();
+      applySheetI18n();
+      refreshOpenSheet();
+      render();
+    }
+
+    function renderDisclaimer() {
+      const d = document.getElementById('about-box');
+      if (!d) return;
+      d.innerHTML =
+        '<button type="button" class="corner-close" aria-label="' + t('closeLabel') + '" title="' + t('closeLabel') + '">✕</button>' +
+        'RIP <a href="https://holavonat.hu">holavonat.hu</a><br><br>' +
+        t('discMirrors') + ' <br>' +
+        '<a href="https://holavonat.github.io/instances" target="_blank" rel="noopener">holavonat.github.io/instances</a><br>' +
+        t('discSource') + ' <br>' +
+        '<a href="https://github.com/holavonat/holavonatis" target="_blank" rel="noopener">github.com/holavonat/holavonatis</a><br><br>' +
+        t('discEmail') + ' <a href="mailto:j@holavonat.is">j@holavonat.is</a>';
+      const c = d.querySelector('.corner-close');
+      if (c) c.addEventListener('click', function () { d.hidden = true; });
+    }
+
+    function langSwitcherHtml() {
+      return '<div class="lang-switch">' +
+        '<button type="button" class="lang-btn" data-setlang="hu">HU</button>' +
+        '<button type="button" class="lang-btn" data-setlang="en">EN</button>' +
+        '<button type="button" id="orm-toggle" class="lang-btn orm-btn" aria-pressed="false" title="' + t('legendRailLayer') + '">' + t('legendRailLayer') + '</button>' +
+        '</div>';
+    }
+
+    function updateLangButtons() {
+      document.querySelectorAll('.lang-btn').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-setlang') === lang);
+      });
+    }
+
+    let legendDiv = null;
+    let legendOpen = !(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+    let legendWasOpen = false;
+    function legendHtml() {
+      return '<button type="button" class="legend-fab" aria-label="' + t('legendOpenLabel') + '" title="' + t('legendOpenLabel') + '">ℹ️</button>' +
+        '<div class="legend-body">' +
+        '<button type="button" class="legend-collapse" aria-label="' + t('legendCloseLabel') + '" title="' + t('legendCloseLabel') + '">✕</button>' +
+        langSwitcherHtml() +
+        '<div class="legend-section"><b>' + t('legendSources') + '</b>' +
+        '<div class="lrow"><i class="round"></i>' + t('legendTrainBoth') + '</div>' +
+        '<div class="lrow"><i class="square"></i>' + t('legendEmigOnly') + '</div>' +
+        '<div class="lrow"><i class="tri"></i>' + t('legendTramHev') + '</div></div>' +
+        '<div class="legend-section"><b>' + t('legendColors') + '</b>' +
+        '<div class="lrow"><i style="background: #00e400"></i>' + t('delay0') + '</div>' +
+        '<div class="lrow"><i style="background: #bfff00"></i>' + t('delay5') + '</div>' +
+        '<div class="lrow"><i style="background: #ffe600"></i>' + t('delay15') + '</div>' +
+        '<div class="lrow"><i style="background: #ff9900"></i>' + t('delay21') + '</div>' +
+        '<div class="lrow"><i style="background: #ff0000"></i>' + t('delay60') + '</div>' +
+        '<div class="lrow"><i style="background: #9e9e9e"></i>' + t('delayUnknown') + '</div></div>' +
+        '<div class="legend-section"><b>' + t('emmaUpdated') + '</b> <span id="timestamp">...</span><br>' +
+        '<b>' + t('emigUpdated') + '</b> <span id="emig-timestamp">...</span></div>' +
+        '</div>';
+    }
+
+    function renderLegend() {
+      if (!legendDiv) legendDiv = document.querySelector('.legend');
+      if (!legendDiv) return;
+      legendDiv.innerHTML = legendHtml();
+      legendDiv.classList.toggle('collapsed', !legendOpen);
+      const fab = legendDiv.querySelector('.legend-fab');
+      if (fab) fab.addEventListener('click', function (ev) { ev.stopPropagation(); legendOpen = true; legendDiv.classList.remove('collapsed'); });
+      const cl = legendDiv.querySelector('.legend-collapse');
+      if (cl) cl.addEventListener('click', function (ev) { ev.stopPropagation(); legendOpen = false; legendDiv.classList.add('collapsed'); });
+      const orm = legendDiv.querySelector('#orm-toggle');
+      if (orm) {
+        orm.classList.toggle('on', ormEnabled);
+        orm.setAttribute('aria-pressed', ormEnabled ? 'true' : 'false');
+        orm.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          ormEnabled = !ormEnabled;
+          if (ormEnabled) railLayer.addTo(map); else map.removeLayer(railLayer);
+          orm.classList.toggle('on', ormEnabled);
+          orm.setAttribute('aria-pressed', ormEnabled ? 'true' : 'false');
+          try { localStorage.setItem('holavonat_orm', ormEnabled ? '1' : '0'); } catch (e) {  }
+        });
+      }
+      legendDiv.querySelectorAll('[data-setlang]').forEach(function (btn) {
+        btn.addEventListener('click', function (ev) { ev.stopPropagation(); setLang(btn.getAttribute('data-setlang')); });
+      });
+      updateLangButtons();
+    }
+
+    function setupLangPopup() {
+      const el = document.getElementById('lang-popup');
+      const msg = document.getElementById('lang-popup-msg');
+      const yes = document.getElementById('lang-yes');
+      const no = document.getElementById('lang-no');
+      if (msg) msg.textContent = I18N.en.langPrompt;
+      if (yes) yes.addEventListener('click', function () { if (el) el.style.display = 'none'; setLang('en'); });
+      if (no) no.addEventListener('click', function () {
+        if (el) el.style.display = 'none';
+        try { localStorage.setItem(LANG_STORE_KEY, 'hu'); } catch (e) {  }
+        lang = 'hu';
+      });
+    }
+
+    function detectLang() {
+      if (storedLang()) return;
+      const list = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+      const prefersEn = list.some(function (l) { return /^en/i.test(l || ''); });
+      if (prefersEn && lang !== 'en') {
+        const el = document.getElementById('lang-popup');
+        if (el) el.style.display = 'flex';
+      }
+    }
+
+    const map = L.map('map', { attributionControl: true }).setView([47.3, 19.1], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors | ' +
+               '<a href="https://www.openrailwaymap.org/" target="_blank" rel="noopener">OpenRailwayMap</a>'
+    }).addTo(map);
+    const railLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+      maxZoom: 18
+    });
+    let ormEnabled = false;
+    try { ormEnabled = localStorage.getItem('holavonat_orm') === '1'; } catch (e) {  }
+    if (ormEnabled) railLayer.addTo(map);
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function () {
+      legendDiv = L.DomUtil.create('div', 'legend');
+      L.DomEvent.disableClickPropagation(legendDiv);
+      renderLegend();
+      return legendDiv;
+    };
+
+    legend.addTo(map);
+
+    const registry = new Map();
+    let currentEntries = [];
+    let activeKey = null;
+    let staleDismissed = false;
+    let stalePinned = false;
+    let staleTimer = null;
+
+    let lastEtag = null;
+    let lastMetrics = null;
+    let lastEmigEtag = null;
+    let lastEmigData = null;
+
+    const FOLLOW_STORE_KEY = 'holavonat_followed';
+    const FOLLOW_TTL_MS = 10 * 60 * 1000;
+    let follows = loadFollows();
+
+    function decodePolyline(encoded) {
+      if (!encoded || encoded.length === 0) return [];
+
+      const coordinates = [];
+      const len = encoded.length;
+      let index = 0;
+      let lat = 0;
+      let lng = 0;
+
+      const decodeValue = () => {
+        let result = 0;
+        let shift = 0;
+        let b;
+
+        do {
+          b = encoded.charCodeAt(index++) - 63;
+          result |= (b & 0x1f) << shift;
+          shift += 5;
+        } while (b >= 0x20 && index < len);
+
+        return (result & 1) ? ~(result >> 1) : (result >> 1);
+      };
+
+      while (index < len) {
+        lat += decodeValue();
+        lng += decodeValue();
+        coordinates.push([lat * 1e-5, lng * 1e-5]);
+      }
+
+      return coordinates;
+    }
+
+    function delayColor(min) {
+      if (min >= 60) return '#ff0000';
+      if (min >= 21) return '#ff9900';
+      if (min >= 15) return '#ffe600';
+      if (min >= 5)  return '#bfff00';
+      return '#00e400';
+    }
+
+    function createMarkerIcon(color, heading, followed, mode) {
+      const container = document.createElement("div");
+      container.className = "marker-container";
+
+      if (mode === 'TRAM' || mode === 'TRAMTRAIN' || mode === 'SUBURBAN_RAILWAY') {
+        const wrap = document.createElement("div");
+        wrap.className = "triangle-wrapper";
+        wrap.style.transform = `rotate(${heading}deg)`;
+        const tri = document.createElement("div");
+        tri.className = followed ? "tri-marker followed" : "tri-marker";
+        tri.style.setProperty('--color', color);
+        wrap.appendChild(tri);
+        container.appendChild(wrap);
+        return L.divIcon({ html: container, className: '', iconSize: [30, 30] });
+      }
+
+      const triangleWrapper = document.createElement("div");
+      triangleWrapper.className = "triangle-wrapper";
+      triangleWrapper.style.transform = `rotate(${heading}deg)`;
+
+      const triangle = document.createElement("div");
+      triangle.className = "triangle";
+
+      const circle = document.createElement("div");
+      circle.className = followed ? "circle followed" : "circle";
+      circle.style.setProperty('--color', color);
+
+      triangleWrapper.appendChild(triangle);
+      container.appendChild(triangleWrapper);
+      container.appendChild(circle);
+
+      return L.divIcon({ html: container, className: '', iconSize: [30, 30] });
+    }
+
+    function createEmigMarkerIcon(color, heading, followed) {
+      const container = document.createElement("div");
+      container.className = "marker-container";
+
+      if (heading != null) {
+        const triangleWrapper = document.createElement("div");
+        triangleWrapper.className = "triangle-wrapper";
+        triangleWrapper.style.transform = `rotate(${heading}deg)`;
+
+        const triangle = document.createElement("div");
+        triangle.className = "triangle";
+
+        triangleWrapper.appendChild(triangle);
+        container.appendChild(triangleWrapper);
+      }
+
+      const square = document.createElement("div");
+      square.className = followed ? "emig-square followed" : "emig-square";
+      square.style.setProperty('--color', color);
+      container.appendChild(square);
+
+      return L.divIcon({ html: container, className: '', iconSize: [30, 30] });
+    }
+
+    function formatTime(sec) {
+      if (sec == null) return '-';
+      const h = String(Math.floor(sec / 3600) % 24).padStart(2, '0');
+      const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      return `${h}:${m}`;
+    }
+
+    function getCurrentDelay(stops, now) {
+      for (const stop of stops) {
+        const arrivalTime = stop.realtimeArrival;
+        if (arrivalTime > now) {
+          return stop.arrivalDelay || stop.departureDelay || 0;
+        }
+      }
+      const lastStop = stops[stops.length - 1];
+      return lastStop ? (lastStop.arrivalDelay || lastStop.departureDelay || 0) : 0;
+    }
+
+    async function getMetrics() {
+      try {
+        const rnd = Date.now();
+        const headResp = await fetch(`https://cdn.holavonat.is/train_data_v3.json?_=${rnd}`, { method: "HEAD" });
+         if (!headResp.ok) {
+            throw new Error(`HTTP error! status: ${headResp.status}`);
+        }
+
+        const etag = headResp.headers.get('ETag');
+        if (etag && etag === lastEtag && lastMetrics) {
+          return;
+        }
+
+        const response = await fetch(`https://cdn.holavonat.is/train_data_v3.json?_=${rnd}`, {});
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        lastEtag = etag;
+        lastMetrics = data;
+      }
+      catch (err) {
+        console.error("Hiba történt az adatok betöltésekor:", err);
+      }
+      return lastMetrics;
+    }
+
+    async function getEmig() {
+      try {
+        const rnd = Date.now();
+        const url = `https://cdn.holavonat.is/emig_data_v1.json?_=${rnd}`;
+        const headResp = await fetch(url, { method: "HEAD" });
+        if (!headResp.ok) {
+          throw new Error(`HTTP error! status: ${headResp.status}`);
+        }
+
+        const etag = headResp.headers.get('ETag');
+        if (etag && etag === lastEmigEtag && lastEmigData) {
+          return;
+        }
+
+        const response = await fetch(url, {});
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        lastEmigEtag = etag;
+        lastEmigData = data;
+      }
+      catch (err) {
+        console.error("Hiba történt az EMIG adatok betöltésekor:", err);
+      }
+      return lastEmigData;
+    }
+
+    function currentNowSec() {
+      const n = new Date();
+      return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+    }
+
+    function delayText(min) {
+      if (min == null) return t('unknownDelay');
+      if (min >= 1) return `${min} ${t('minLate')}`;
+      if (min <= -1) return `${-min} ${t('minEarly')}`;
+      return t('onTime');
+    }
+
+    function delayInfo(entry, nowSec) {
+      let min = null;
+      if (entry.emig && entry.emig.delayMin != null) {
+        min = Math.round(entry.emig.delayMin);
+      } else if (entry.emma && entry.emma.trip && Array.isArray(entry.emma.trip.stoptimes)) {
+        min = Math.round(getCurrentDelay(entry.emma.trip.stoptimes, nowSec) / 60);
+      }
+      return { min, text: delayText(min), color: (min == null) ? '#9e9e9e' : delayColor(min) };
+    }
+
+    function emigStateLabel(e) {
+      if (e.type === 'S') return t('passenger');
+      if (e.type === 'T') return t('freight');
+      return (e.moving || e.heading != null) ? t('inTransit') : t('stationing');
+    }
+
+    function emigRoute(e) {
+      if (!e.from && !e.to) return '';
+      return `${e.from || '?'} → ${e.to || '?'}`;
+    }
+
+    function emigQueryDateStr() {
+      const ts = lastEmigData && (lastEmigData.timestamp || (lastEmigData.lastUpdated ? lastEmigData.lastUpdated * 1000 : null));
+      return ts ? new Date(ts).toLocaleString(dateLocale(), { timeZone: "Europe/Budapest" }) : '—';
+    }
+
+    function emmaDelayMinutes(entry, nowSec) {
+      if (entry.emma && entry.emma.trip && Array.isArray(entry.emma.trip.stoptimes)) {
+        return Math.round(getCurrentDelay(entry.emma.trip.stoptimes, nowSec) / 60);
+      }
+      return null;
+    }
+
+    function emigDelayMinutes(entry) {
+      return (entry.emig && entry.emig.delayMin != null) ? Math.round(entry.emig.delayMin) : null;
+    }
+
+    function dRow(icon, html) {
+      return '<div class="d-row"><span class="ic">' + icon + '</span><span class="tx">' + html + '</span></div>';
+    }
+    function dSection(header, inner) {
+      return '<div class="sect">' + (header ? '<div class="sect-h">' + header + '</div>' : '') + inner + '</div>';
+    }
+    function dTitle(logo, name, sub) {
+      return '<div class="d-title">' + (logo ? '<span class="d-logo">' + logo + '</span>' : '') + '<span>' + name + '</span></div>' +
+        (sub ? '<div class="d-sub">' + sub + '</div>' : '');
+    }
+
+    function delaySectionHtml(entry, nowSec) {
+      const em = emmaDelayMinutes(entry, nowSec);
+      const eg = emigDelayMinutes(entry);
+      if (entry.emma && entry.emig) {
+        let diffStr = '—';
+        if (em != null && eg != null) {
+          const d = eg - em;
+          diffStr = (d > 0 ? '+' + d : '' + d) + ' ' + t('minUnit');
+        }
+        return dRow('⏰', t('delayEmig') + ' ' + delayText(eg)) +
+               dRow('🕒', t('delayEmma') + ' ' + delayText(em)) +
+               dRow('↔️', t('delayDiff') + ' ' + diffStr);
+      }
+      const single = (eg != null) ? eg : em;
+      return dRow('⏰', t('delaySingle') + ' ' + delayText(single));
+    }
+
+    function formatUic(id) {
+      if (!id) return '';
+      const m = id.match(/^(\d{2})(\d{2})(\d{4})(\d{3})(\d)$/);
+      return m ? `${m[1]} ${m[2]} ${m[3]} ${m[4]}-${m[5]}` : id;
+    }
+
+    function emmaVehicleName(trip) {
+      switch (trip && trip.route && trip.route.mode) {
+        case "RAIL": return { name: trip.tripShortName || t('unknownTrain'), logo: "🚄" };
+        case "TRAM": return { name: trip.route.shortName || t('unknownTram'), logo: "🚋" };
+        case "SUBURBAN_RAILWAY": return { name: trip.tripShortName || t('unknownSuburban'), logo: "🚉" };
+        case "TRAMTRAIN": return { name: trip.tripShortName || t('unknownTramTrain'), logo: "🚊" };
+        default: return { name: t('unknownVehicle'), logo: "❓" };
+      }
+    }
+
+    function emmaStoptimesTable(trip, nowSec) {
+      let table = `<div class="popup-table-container"><table><thead><tr><th>${t('thStation')}</th><th>${t('thArr')}</th><th>${t('thDep')}</th><th>${t('thTrack')}</th></tr></thead><tbody>`;
+      (trip.stoptimes || []).forEach(stop => {
+        const arr = formatTime(stop.scheduledArrival);
+        const rta = formatTime(stop.realtimeArrival);
+        const dep = formatTime(stop.scheduledDeparture);
+        const rtd = formatTime(stop.realtimeDeparture);
+        let track = stop.stop.platformCode;
+        if (track == null) {
+          track = "-";
+        }
+        const arrDelay = (stop.arrivalDelay || 0) / 60;
+        const depDelay = (stop.departureDelay || 0) / 60;
+        const delayedClass = (arrDelay > 0 || depDelay > 0) ? 'delayed' : '';
+        const isPassed = (stop.realtimeDeparture || 0) < nowSec;
+        const s = stop.stop;
+        const nameCell = (s && s.lat != null && s.lon != null)
+          ? `<span class="stop-link" data-lat="${s.lat}" data-lon="${s.lon}">${escapeHtml(s.name)}</span>`
+          : escapeHtml(s ? s.name : '');
+
+        table += `<tr class="${isPassed ? 'passed' : ''}">
+          <td>${nameCell}</td>
+          <td>${arr}<br><span class="${delayedClass}">${rta}</span></td>
+          <td>${dep}<br><span class="${delayedClass}">${rtd}</span></td>
+          <td>${track}</td>
+        </tr>`;
+      });
+      table += '</tbody></table></div>';
+      return table;
+    }
+
+    function emmaServicesHtml(trip) {
+      if (trip.infoServices == null) return '';
+      const serviceDetails = new Map();
+      trip.infoServices.forEach(service => {
+        let pictogram = "";
+        let hu = service.name;
+        switch (service.name) {
+          case "HungaryPass accepted": hu = "Ország Bérlettel használható"; pictogram = "🇭🇺"; break;
+          case "BudapestPass accepted.": hu = "Budapest Bérlettel használható"; pictogram = "🚇"; break;
+          case "premium class": hu = "Prémium osztály"; pictogram = "✨"; break;
+          case "Second Class": hu = "Másodosztály"; pictogram = "2️⃣"; break;
+          case "First class in the train": hu = "Első osztály"; pictogram = "1️⃣"; break;
+          case "Seat Reservation compulsory": hu = "Helyjegy kötelező"; pictogram = "💺"; break;
+          case "A wagon suitable for wheelchair travel with a lifting device": hu = "Mozgáskorlátozottak számára hozzáférhető kocsi emelővel"; pictogram = "♿"; break;
+          case "A wagon suitable for wheelchair travel without a lifting device": hu = "Mozgáskorlátozottak számára hozzáférhető kocsi emelő nélkül"; pictogram = "♿"; break;
+          case "Bicycle transport is not possible": hu = "Kerékpár szállítás nem lehetséges"; pictogram = "🚳"; break;
+          case "Bicycle transport in the designated place. (Limited space, we recommend to notify us in advance of the trip for more than 6 bycicles.)": hu = "Kerékpár szállítás a kijelölt helyen. (Korlátozott hely, javasoljuk, hogy előre jelezze az utazást több mint 6 kerékpár esetén.)"; pictogram = "🚴"; break;
+          case "Long distance train": hu = "Hosszútávú vonat"; pictogram = "🚆"; break;
+          case "buffet": hu = "Büfé"; pictogram = "☕"; break;
+          case "Domestic travel without reservation on the assigned destination.": hu = "Belföldi utazás foglalás nélkül"; pictogram = "🆓"; break;
+          case "Train does not wait for connection": hu = "Vonat nem vár csatlakozásra"; pictogram = "⏳"; break;
+          case "Suburban train": hu = "Elővárosi vonat"; pictogram = "🚉"; break;
+          case "Train without a conductor, boarding only with a valid ticket.": hu = "Vonat kalauz nélkül, csak érvényes jeggyel lehet felszállni"; pictogram = "🚫"; break;
+          case "Air conditioned vehicle": hu = "Légkondicionált jármű"; pictogram = "❄️"; break;
+          case "Bicycles can be transported in wagons marked with a pictogram (up to 4 per wagon).": hu = "Kerékpárok szállítása a jelképpel ellátott kocsikban (kocsinként legfeljebb 4 kerékpár)."; pictogram = "🚲"; break;
+          case "With designated car for bicycle, suitable also for special bicycles. (For more than 6 bicycles, its recommend to notifying us in advance.)": hu = "Kijelölt kerékpárkocsi, amely alkalmas speciális kerékpárok számára is. (Több mint 6 kerékpár esetén javasolt előre jelezni.)"; pictogram = "🚴"; break;
+          case "Restaurant car": hu = "Étkezőkocsi"; pictogram = "🍽️"; break;
+          case "Direct coach(es)": hu = "Közvetlen járat"; pictogram = "🚌"; break;
+          case "Bicycles can be transported in the designated place. Booking a bicycle space is mandatory.": hu = "Kerékpárok szállítása a kijelölt helyen. Kerékpár hely foglalása kötelező."; pictogram = "🚴"; break;
+          case "In case of cross border travel international ticket is required for the entire journey.": hu = "Határon átnyúló utazás esetén nemzetközi jegy szükséges az egész útra."; pictogram = "🌍"; break;
+          case "Seat reservation can be made": hu = "Helyjegy foglalható"; pictogram = "🪑"; break;
+          case "In domestic traffic seat Reservation compulsory, seat Reservation in international traffic can be made.": hu = "Belföldi forgalomban helyjegy kötelező, nemzetközi forgalomban helyjegy foglalható."; pictogram = "🛤️"; break;
+          case "A cabin or places reserved for disabled person": hu = "Mozgáskorlátozottak számára fenntartott fülke vagy helyek"; pictogram = "♿"; break;
+          default: pictogram = "ℹ️"; break;
+        }
+        const label = (lang === 'hu') ? hu : service.name;
+        serviceDetails.set(label, pictogram);
+      });
+      if (serviceDetails.size === 0) return '';
+      let inner = '';
+      for (const [key, value] of serviceDetails) {
+        inner += dRow(value, key);
+      }
+      return dSection(t('servicesHeader'), inner);
+    }
+
+    function emigBlockHtml(e) {
+      const label = emigStateLabel(e);
+      const route = emigRoute(e);
+      let inner = '<div class="d-badge">🚆 ' + t('emigOfficial') + '</div>';
+      inner += e.trainNumber ? dRow('🚆', t('trainNo') + ' ' + e.trainNumber + ' (' + label + ')') : dRow('🚆', label);
+      if (route) inner += dRow('🧭', route);
+      if (e.trainId) inner += dRow('🆔', t('trainId') + ' ' + e.trainId);
+      inner += dRow('🗓️', t('emigQueried') + ' ' + emigQueryDateStr());
+      inner += '<div class="d-muted">' + t('emigSquareNote') + '</div>';
+      return dSection('', inner);
+    }
+
+    function emigStandalonePopup(e, headline) {
+      const label = emigStateLabel(e);
+      const route = emigRoute(e);
+      const name = e.trainNumber ? e.trainNumber + ' · ' + label : label;
+      let details = dRow('🆔', 'UIC: ' + (e.uic || e.uicRaw || '—')) +
+        dRow('⏰', t('delaySingle') + ' ' + headline);
+      if (e.trainId) details += dRow('🚆', t('trainId') + ' ' + e.trainId);
+      details += dRow('🗓️', t('emigQueried') + ' ' + emigQueryDateStr());
+      return '<div class="d-badge">🚆 ' + t('emigOfficial') + '</div>' +
+        dTitle('', name, route) +
+        dSection(t('vehicleDetails'), details) +
+        '<div class="sect"><div class="d-muted">' + t('emigSource') + '</div></div>';
+    }
+
+    function circleTooltip(rec) {
+      const v = rec.entry.emma;
+      const di = delayInfo(rec.entry, currentNowSec());
+      const { name } = emmaVehicleName(v.trip);
+      const uic = formatUic((v.vehicleId || '').split(':')[1] || '');
+      const speed = Math.round((v.speed || 0) * 3.6);
+      return `${name} (${uic}) (${speed} km/h) - ${di.text}`;
+    }
+
+    function squareTooltip(rec) {
+      const e = rec.entry.emig;
+      const di = delayInfo(rec.entry, currentNowSec());
+      const head = e.trainNumber || e.uic || e.uicRaw || '—';
+      const route = emigRoute(e);
+      return `${head} (${emigStateLabel(e)})${route ? ' ' + route : ''} — ${di.text}`;
+    }
+
+    function circlePopup(rec) {
+      const v = rec.entry.emma;
+      const nowSec = currentNowSec();
+      const { name, logo } = emmaVehicleName(v.trip);
+      const uic = formatUic((v.vehicleId || '').split(':')[1] || '');
+      const speed = Math.round((v.speed || 0) * 3.6);
+      const lastUpd = new Date(v.lastUpdated * 1000).toLocaleString(dateLocale(), { timeZone: "Europe/Budapest" });
+
+      const details =
+        dRow('🆔', 'UIC: ' + uic) +
+        dRow('♿', t('wheelchair') + ' ' + (v.trip.wheelchairAccessible == "POSSIBLE" ? t('supported') : t('notSupported'))) +
+        dRow('🚲', t('bicycle') + ' ' + (v.trip.bikesAllowed == "ALLOWED" ? t('supported') : t('notSupported'))) +
+        dRow('💨', t('speed') + ' ' + speed + ' km/h') +
+        delaySectionHtml(rec.entry, nowSec) +
+        dRow('🗓️', '<span class="d-muted">' + t('lastUpdateEmma') + ' ' + lastUpd + '</span>');
+
+      return followButtonHtml(rec.entry) +
+        dTitle(logo, name, v.trip.tripHeadsign || '') +
+        dSection(t('vehicleDetails'), details) +
+        emmaServicesHtml(v.trip) +
+        (rec.entry.emig ? emigBlockHtml(rec.entry.emig) : '') +
+        dSection(t('stations'), emmaStoptimesTable(v.trip, nowSec));
+    }
+
+    function squarePopup(rec) {
+      return followButtonHtml(rec.entry) + emigStandalonePopup(rec.entry.emig, delayInfo(rec.entry, currentNowSec()).text);
+    }
+
+    function buildModel() {
+      const emma = (lastMetrics && lastMetrics.vehiclePositions) || [];
+      const emig = (lastEmigData && lastEmigData.trains) || [];
+
+      const emigByUic = new Map();
+      for (const t of emig) {
+        if (t.uicRaw) emigByUic.set(t.uicRaw, t);
+      }
+
+      const used = new Set();
+      const entries = [];
+
+      for (const v of emma) {
+        if (v.lat == null || v.lon == null) continue;
+        const uic = (v.vehicleId || '').split(':')[1] || '';
+        const m = uic ? emigByUic.get(uic) : null;
+        if (m) used.add(m);
+        entries.push({ key: v.vehicleId || ('emma:' + uic), emma: v, emig: m || null });
+      }
+
+      for (const t of emig) {
+        if (used.has(t)) continue;
+        if (t.lat == null || t.lon == null) continue;
+        entries.push({ key: 'emig:' + (t.trainId || t.uicRaw || (t.lat + ',' + t.lon)), emma: null, emig: t });
+      }
+
+      return entries;
+    }
+
+    function showSquare(rec) {
+      if (!rec.square) return;
+      if (!rec.squareShown) {
+        rec.square.addTo(map);
+        rec.squareShown = true;
+      }
+      if (rec.entry.emma && rec.entry.emig && !rec.connector) {
+        rec.connector = L.polyline(
+          [[rec.entry.emma.lat, rec.entry.emma.lon], [rec.entry.emig.lat, rec.entry.emig.lon]],
+          { color: '#0033a0', weight: 2, dashArray: '4 4', opacity: 0.8 }
+        ).addTo(map);
+      }
+    }
+
+    function hideSquare(rec) {
+      if (rec.square && rec.squareShown) {
+        rec.square.remove();
+        rec.squareShown = false;
+      }
+      if (rec.connector) {
+        rec.connector.remove();
+        rec.connector = null;
+      }
+    }
+
+    function drawStopDots(stoptimes) {
+      const g = L.layerGroup();
+      (stoptimes || []).forEach(function (st) {
+        const s = st.stop;
+        if (s && s.lat != null && s.lon != null) {
+          L.circleMarker([s.lat, s.lon], {
+            radius: 4, color: '#f41804', weight: 2, fillColor: '#fff', fillOpacity: 1
+          }).bindTooltip(s.name, { direction: 'top' }).addTo(g);
+        }
+      });
+      return g.addTo(map);
+    }
+
+    function showRoute(rec) {
+      const v = rec.entry && rec.entry.emma;
+      if (!v || !v.trip) return;
+      if (!rec.polyline && v.trip.tripGeometry && v.trip.tripGeometry.points) {
+        rec.polyline = L.polyline(decodePolyline(v.trip.tripGeometry.points), {
+          color: '#f41804', weight: 5, opacity: 1, lineJoin: 'round'
+        }).addTo(map);
+      }
+      if (!rec.stopDots && Array.isArray(v.trip.stoptimes)) {
+        rec.stopDots = drawStopDots(v.trip.stoptimes);
+      }
+    }
+
+    function hideRoute(rec) {
+      if (rec.polyline) { rec.polyline.remove(); rec.polyline = null; }
+      if (rec.stopDots) { rec.stopDots.remove(); rec.stopDots = null; }
+    }
+
+    function attachHover(rec) {
+      rec.circle.on('mouseover', () => showRoute(rec));
+      rec.circle.on('mouseout', () => {
+        if (activeKey !== rec.key) hideRoute(rec);
+      });
+    }
+
+    function removeCircle(rec) {
+      hideRoute(rec);
+      if (rec.circle) { rec.circle.remove(); rec.circle = null; }
+    }
+
+    function removeRec(rec) {
+      removeCircle(rec);
+      hideSquare(rec);
+      if (rec.square) { rec.square.remove(); rec.square = null; }
+      if (activeKey === rec.key) activeKey = null;
+    }
+
+    let stationMarker = null;
+    let stationMarkerTimer = null;
+    function showStationMarker(lat, lon, name) {
+      clearTimeout(stationMarkerTimer);
+      if (stationMarker) { stationMarker.remove(); stationMarker = null; }
+      const icon = L.divIcon({ className: '', html: '<div class="station-pin"></div>', iconSize: [22, 22], iconAnchor: [11, 11] });
+      stationMarker = L.marker([lat, lon], { icon: icon, interactive: false, zIndexOffset: 1000 }).addTo(map);
+      if (name) stationMarker.bindTooltip(name, { permanent: true, direction: 'top', className: 'station-tip' }).openTooltip();
+      stationMarkerTimer = setTimeout(function () {
+        if (stationMarker) { stationMarker.remove(); stationMarker = null; }
+      }, 7000);
+    }
+
+    let pendingHash = '';
+    function trainHashId(rec) {
+      const e = rec.entry;
+      const uic = e.emma ? (e.emma.vehicleId || '').split(':')[1] : (e.emig ? e.emig.uicRaw : '');
+      if (uic) return uic;
+      if (e.emig && e.emig.trainId) return e.emig.trainId;
+      return e.emma ? (e.emma.vehicleId || '') : '';
+    }
+    function setHash(id) {
+      try {
+        history.replaceState(null, '', id ? ('#' + encodeURIComponent(id)) : (location.pathname + location.search));
+      } catch (e) {  }
+    }
+    function openFromHash() {
+      if (!pendingHash) return false;
+      for (const rec of registry.values()) {
+        if (rec.entry && trainHashId(rec) === pendingHash) {
+          const m = rec.circle || rec.square;
+          if (m) map.setView(m.getLatLng(), Math.max(map.getZoom(), 12));
+          openDetails(rec);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function showStaleNotice(html) {
+      const w = document.getElementById('stale-warning');
+      if (!w) return;
+      if (w.dataset.shown === '1' && !w.hidden) return;
+      w.innerHTML =
+        '<button type="button" class="stale-close" aria-label="' + t('closeLabel') + '" title="' + t('closeLabel') + '">✕</button>' +
+        '<div class="stale-content">' + html + '</div>';
+      w.hidden = false;
+      w.classList.remove('fading');
+      w.dataset.shown = '1';
+      const sc = w.querySelector('.stale-close');
+      if (sc) sc.addEventListener('click', function (ev) { ev.stopPropagation(); dismissStale(); });
+      w.onclick = pinStale;
+      startStaleTimer();
+    }
+    function startStaleTimer() {
+      if (stalePinned) return;
+      clearTimeout(staleTimer);
+      staleTimer = setTimeout(function () {
+        if (stalePinned) return;
+        const w = document.getElementById('stale-warning');
+        if (!w || w.hidden) return;
+        w.classList.add('fading');
+        staleTimer = setTimeout(function () { if (!stalePinned) dismissStale(); }, 1000);
+      }, 5000);
+    }
+    function pinStale() {
+      stalePinned = true;
+      clearTimeout(staleTimer);
+      const w = document.getElementById('stale-warning');
+      if (w) w.classList.remove('fading');
+    }
+    function dismissStale() {
+      staleDismissed = true;
+      stalePinned = false;
+      clearTimeout(staleTimer);
+      const w = document.getElementById('stale-warning');
+      if (w) { w.classList.remove('fading'); w.hidden = true; w.dataset.shown = '0'; }
+    }
+
+    function render() {
+      const now = new Date();
+      const nowSec = currentNowSec();
+      const STALE_MS = 5 * 60 * 1000;
+      const tz = { timeZone: "Europe/Budapest" };
+      const staleLines = [];
+
+      if (lastMetrics && lastMetrics.timestamp) {
+        const d = new Date(lastMetrics.timestamp);
+        const ts = document.getElementById("timestamp");
+        if (ts) ts.textContent = d.toLocaleTimeString(dateLocale(), tz);
+        if (now.getTime() - d.getTime() > STALE_MS) {
+          staleLines.push(t('staleEmma').replace('{t}', d.toLocaleTimeString(dateLocale(), tz)));
+        }
+      }
+      if (lastEmigData && lastEmigData.timestamp) {
+        const d = new Date(lastEmigData.timestamp);
+        const ets = document.getElementById("emig-timestamp");
+        if (ets) ets.textContent = d.toLocaleTimeString(dateLocale(), tz);
+        if (now.getTime() - d.getTime() > STALE_MS) {
+          staleLines.push(t('staleEmig').replace('{t}', d.toLocaleTimeString(dateLocale(), tz)));
+        }
+      }
+      if (staleLines.length && !staleDismissed) {
+        showStaleNotice(staleLines.join('<br>') + '<br>' + t('staleNote'));
+      } else if (!staleLines.length) {
+        staleDismissed = false;
+        stalePinned = false;
+        clearTimeout(staleTimer);
+        const w = document.getElementById('stale-warning');
+        if (w) { w.hidden = true; w.classList.remove('fading'); w.dataset.shown = '0'; }
+      }
+
+      const entries = buildModel();
+      currentEntries = entries;
+      const seen = new Set();
+
+      const nowMs = now.getTime();
+      const presentFollow = new Set();
+      for (const en of entries) {
+        const fk = followKey(en);
+        if (fk) presentFollow.add(fk);
+      }
+      for (const fk of Object.keys(follows)) {
+        if (presentFollow.has(fk)) {
+          follows[fk].lastSeen = nowMs;
+        } else if (nowMs - (follows[fk].lastSeen || 0) > FOLLOW_TTL_MS) {
+          delete follows[fk];
+        }
+      }
+      saveFollows();
+
+      for (const entry of entries) {
+        seen.add(entry.key);
+        const di = delayInfo(entry, nowSec);
+        const followed = isFollowed(followKey(entry));
+
+        let rec = registry.get(entry.key);
+        if (!rec) { rec = { key: entry.key }; registry.set(entry.key, rec); }
+        rec.entry = entry;
+
+        if (entry.emma) {
+          const v = entry.emma;
+          const heading = v.heading || 0;
+          const mode = (v.trip && v.trip.route && v.trip.route.mode) || '';
+          if (!rec.circle) {
+            rec.circle = L.marker([v.lat, v.lon], { icon: createMarkerIcon(di.color, heading, followed, mode) }).addTo(map);
+            rec.circle.bindTooltip(() => circleTooltip(rec), { direction: "top" });
+            rec.circle.on('click', () => openDetails(rec));
+            attachHover(rec);
+            rec._color = di.color;
+            rec._heading = heading;
+            rec._followed = followed;
+          } else {
+            rec.circle.setLatLng([v.lat, v.lon]);
+            if (rec._color !== di.color || rec._heading !== heading || rec._followed !== followed) {
+              rec.circle.setIcon(createMarkerIcon(di.color, heading, followed, mode));
+              rec._color = di.color;
+              rec._heading = heading;
+              rec._followed = followed;
+            }
+          }
+        } else if (rec.circle) {
+          removeCircle(rec);
+        }
+
+        const e = entry.emig;
+        if (e) {
+          const matched = !!entry.emma;
+          if (!rec.square) {
+            rec.square = L.marker([e.lat, e.lon], { icon: createEmigMarkerIcon(di.color, e.heading, followed) });
+            rec.square.bindTooltip(() => squareTooltip(rec), { direction: "top" });
+            rec.square.on('click', () => openDetails(rec));
+            rec._sqColor = di.color;
+            rec._sqHeading = e.heading;
+            rec._sqFollowed = followed;
+            if (!matched) { rec.square.addTo(map); rec.squareShown = true; }
+          } else {
+            rec.square.setLatLng([e.lat, e.lon]);
+            if (rec._sqColor !== di.color || rec._sqHeading !== e.heading || rec._sqFollowed !== followed) {
+              rec.square.setIcon(createEmigMarkerIcon(di.color, e.heading, followed));
+              rec._sqColor = di.color;
+              rec._sqHeading = e.heading;
+              rec._sqFollowed = followed;
+            }
+            if (!matched && !rec.squareShown) { rec.square.addTo(map); rec.squareShown = true; }
+          }
+          if (matched && rec.squareShown && rec.connector) {
+            rec.connector.setLatLngs([[entry.emma.lat, entry.emma.lon], [e.lat, e.lon]]);
+          }
+        } else if (rec.square) {
+          hideSquare(rec);
+          rec.square.remove();
+          rec.square = null;
+        }
+      }
+
+      for (const [key, rec] of registry) {
+        if (!seen.has(key)) {
+          removeRec(rec);
+          registry.delete(key);
+        }
+      }
+
+      if (activeKey) {
+        const rec = registry.get(activeKey);
+        if (rec && rec.entry && rec.entry.emig) showSquare(rec);
+      }
+
+      if (sheetOpen) {
+        if (!activeKey || !registry.get(activeKey)) closeDetails();
+        else refreshOpenSheet();
+      }
+
+      if (pendingHash && !sheetOpen) openFromHash();
+
+      renderFollowPanel();
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+
+    function trainSearchHaystack(entry) {
+      const parts = [];
+      const v = entry.emma;
+      const e = entry.emig;
+      if (v) {
+        const t = v.trip || {};
+        parts.push(t.tripShortName, t.domesticResTrainNumber, t.tripNumber, t.trainName, t.tripHeadsign, (v.vehicleId || '').split(':')[1]);
+      }
+      if (e) {
+        parts.push(e.trainNumber, e.uic, e.uicRaw, e.from, e.to);
+      }
+      return parts.filter(Boolean).join(' ').toLowerCase();
+    }
+
+    function searchLabel(entry) {
+      const v = entry.emma;
+      const e = entry.emig;
+      if (v) {
+        const { name } = emmaVehicleName(v.trip);
+        return `${name} → ${v.trip.tripHeadsign || ''}`.trim();
+      }
+      const head = e.trainNumber || e.uic || e.uicRaw || '—';
+      const route = emigRoute(e);
+      return `${head} (${emigStateLabel(e)})${route ? ' ' + route : ''}`;
+    }
+
+    function focusTrain(key) {
+      const rec = registry.get(key);
+      if (!rec) return;
+      const m = rec.circle || rec.square;
+      if (!m) return;
+      map.setView(m.getLatLng(), 13);
+      openDetails(rec);
+    }
+
+    let searchDebounce = null;
+    function renderSearch(q, results) {
+      q = (q || '').trim().toLowerCase();
+      if (q.length < 2) { results.style.display = 'none'; results.innerHTML = ''; return; }
+      const matches = currentEntries.filter(en => trainSearchHaystack(en).includes(q)).slice(0, 8);
+      results.innerHTML = '';
+      if (matches.length === 0) {
+        results.innerHTML = `<div class="search-empty">${t('noResults')}</div>`;
+        results.style.display = 'block';
+        return;
+      }
+      for (const en of matches) {
+        const badge = en.emma ? '●' : '◼';
+        const div = document.createElement('div');
+        div.className = 'search-item';
+        div.innerHTML = `<span class="search-badge">${badge}</span> ${escapeHtml(searchLabel(en))}`;
+        div.addEventListener('click', () => {
+          focusTrain(en.key);
+          results.style.display = 'none';
+        });
+        results.appendChild(div);
+      }
+      results.style.display = 'block';
+    }
+
+    function setupSearch() {
+      const input = document.getElementById('search');
+      const results = document.getElementById('search-results');
+      if (!input || !results) return;
+      input.addEventListener('input', () => {
+        const fp = document.getElementById('follow-panel');
+        if (fp) fp.style.display = 'none';
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => renderSearch(input.value, results), 150);
+      });
+      input.addEventListener('focus', () => { if (input.value) renderSearch(input.value, results); });
+      document.addEventListener('click', (ev) => {
+        const box = document.getElementById('searchbox');
+        if (box && !box.contains(ev.target)) results.style.display = 'none';
+      });
+    }
+
+    function followKey(entry) {
+      const uic = entry.emma
+        ? (entry.emma.vehicleId || '').split(':')[1]
+        : entry.emig ? (entry.emig.uicRaw || '') : '';
+      if (uic) return 'uic:' + uic;
+      if (entry.emig && entry.emig.trainId) return 'tid:' + entry.emig.trainId;
+      return null;
+    }
+
+    function loadFollows() {
+      try { return JSON.parse(localStorage.getItem(FOLLOW_STORE_KEY)) || {}; }
+      catch (e) { return {}; }
+    }
+
+    function saveFollows() {
+      try { localStorage.setItem(FOLLOW_STORE_KEY, JSON.stringify(follows)); }
+      catch (e) {  }
+    }
+
+    function isFollowed(key) { return !!(key && follows[key]); }
+
+    function labelForKey(key) {
+      for (const en of currentEntries) {
+        if (followKey(en) === key) return searchLabel(en);
+      }
+      return (follows[key] && follows[key].label) || key;
+    }
+
+    function toggleFollow(key, btn) {
+      if (!key) return;
+      if (isFollowed(key)) {
+        delete follows[key];
+      } else {
+        const now = Date.now();
+        follows[key] = { label: labelForKey(key), addedAt: now, lastSeen: now };
+      }
+      saveFollows();
+      const on = isFollowed(key);
+      if (btn) {
+        btn.textContent = on ? t('followBtnOn') : t('followBtnOff');
+        btn.classList.toggle('on', on);
+      }
+      render();
+    }
+    window.toggleFollow = toggleFollow;
+
+    function followButtonHtml(entry) {
+      const key = followKey(entry);
+      if (!key) return '';
+      const on = isFollowed(key);
+      const safe = key.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return `<button type="button" class="follow-btn${on ? ' on' : ''}" onclick="toggleFollow('${safe}', this)">${on ? t('followBtnOn') : t('followBtnOff')}</button><br>`;
+    }
+
+    function focusFollowed(key) {
+      for (const rec of registry.values()) {
+        if (rec.entry && followKey(rec.entry) === key) {
+          const m = rec.circle || rec.square;
+          if (m) { map.setView(m.getLatLng(), 13); openDetails(rec); }
+          const panel = document.getElementById('follow-panel');
+          if (panel) panel.style.display = 'none';
+          return;
+        }
+      }
+    }
+
+    function renderFollowPanel() {
+      const toggle = document.getElementById('follow-toggle');
+      const panel = document.getElementById('follow-panel');
+      if (!toggle || !panel) return;
+      const keys = Object.keys(follows);
+      toggle.innerHTML = `★ <span class="ftxt">${escapeHtml(t('followLabel'))} </span>(${keys.length})`;
+      if (keys.length === 0) {
+        panel.innerHTML = `<div class="follow-empty">${t('followEmpty')}</div>`;
+        return;
+      }
+      const present = new Set(currentEntries.map(followKey));
+      panel.innerHTML = '';
+      for (const key of keys) {
+        const f = follows[key];
+        const live = present.has(key);
+        const item = document.createElement('div');
+        item.className = 'follow-item' + (live ? '' : ' stale');
+
+        const lbl = document.createElement('span');
+        lbl.className = 'lbl';
+        lbl.textContent = (live ? '● ' : '○ ') + (f.label || key);
+        lbl.title = live ? t('followJump') : t('followNoData');
+        if (live) lbl.addEventListener('click', () => focusFollowed(key));
+
+        const rm = document.createElement('button');
+        rm.type = 'button';
+        rm.className = 'rm';
+        rm.textContent = '✕';
+        rm.title = t('followRemove');
+        rm.addEventListener('click', (ev) => { ev.stopPropagation(); delete follows[key]; saveFollows(); render(); });
+
+        item.appendChild(lbl);
+        item.appendChild(rm);
+        panel.appendChild(item);
+      }
+    }
+
+    function setupFollow() {
+      const toggle = document.getElementById('follow-toggle');
+      const panel = document.getElementById('follow-panel');
+      if (!toggle || !panel) return;
+      toggle.addEventListener('click', () => {
+        const sr = document.getElementById('search-results');
+        if (sr) sr.style.display = 'none';
+        panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'block' : 'none';
+      });
+      document.addEventListener('click', (ev) => {
+        const box = document.getElementById('follow-box');
+        if (box && !box.contains(ev.target)) panel.style.display = 'none';
+      });
+      renderFollowPanel();
+    }
+
+    const sheetEl = document.getElementById('details');
+    const sheetBody = document.getElementById('sheet-body');
+    const sheetTitle = document.getElementById('sheet-title');
+    const sheetExpandBtn = document.getElementById('sheet-expand');
+    let sheetOpen = false;
+    let sheetRec = null;
+
+    function sheetContent(rec) { return rec.entry.emma ? circlePopup(rec) : squarePopup(rec); }
+    function sheetHeadline(rec) {
+      const e = rec.entry;
+      if (e.emma) {
+        const { name } = emmaVehicleName(e.emma.trip);
+        const uic = formatUic((e.emma.vehicleId || '').split(':')[1] || '');
+        return uic ? `${name} (${uic})` : name;
+      }
+      const g = e.emig;
+      const head = g.trainNumber || g.uic || g.uicRaw || '—';
+      return `${head} (${emigStateLabel(g)})`;
+    }
+
+    function openSheet() {
+      if (!sheetEl) return;
+      sheetEl.hidden = false;
+      requestAnimationFrame(function () { sheetEl.classList.add('open'); });
+      sheetOpen = true;
+      const closeBtn = document.getElementById('sheet-close');
+      if (closeBtn) { try { closeBtn.focus({ preventScroll: true }); } catch (e) {  } }
+    }
+
+    function closeSheet() {
+      if (!sheetEl) return;
+      sheetEl.classList.remove('open', 'full');
+      sheetOpen = false;
+      const onEnd = function () { if (!sheetOpen) sheetEl.hidden = true; sheetEl.removeEventListener('transitionend', onEnd); };
+      sheetEl.addEventListener('transitionend', onEnd);
+      applySheetI18n();
+    }
+
+    function openDetails(rec) {
+      if (!rec || !rec.entry || !sheetEl) return;
+      pendingHash = '';
+      if (!sheetOpen && window.matchMedia('(min-width: 601px)').matches) {
+        legendWasOpen = legendOpen;
+        if (legendOpen && legendDiv) { legendOpen = false; legendDiv.classList.add('collapsed'); }
+      }
+      if (activeKey && activeKey !== rec.key) {
+        const prev = registry.get(activeKey);
+        if (prev) { if (prev.entry && prev.entry.emig) hideSquare(prev); hideRoute(prev); }
+      }
+      activeKey = rec.key;
+      sheetRec = rec;
+      setHash(trainHashId(rec));
+      sheetBody.innerHTML = sheetContent(rec);
+      sheetBody.scrollTop = 0;
+      sheetTitle.textContent = sheetHeadline(rec);
+      if (rec.entry.emig) showSquare(rec);
+      if (rec.entry.emma) showRoute(rec);
+      openSheet();
+      keepMarkerVisible(rec);
+    }
+
+    function closeDetails() {
+      if (activeKey) {
+        const rec = registry.get(activeKey);
+        if (rec && rec.entry && rec.entry.emig) hideSquare(rec);
+        if (rec) hideRoute(rec);
+        activeKey = null;
+      }
+      sheetRec = null;
+      setHash(null);
+      if (legendWasOpen && legendDiv) { legendOpen = true; legendDiv.classList.remove('collapsed'); }
+      legendWasOpen = false;
+      closeSheet();
+    }
+
+    function keepMarkerVisible(rec) {
+      setTimeout(function () {
+        if (!sheetOpen) return;
+        const pts = [];
+        if (rec.circle) pts.push(map.latLngToContainerPoint(rec.circle.getLatLng()));
+        if (rec.square && rec.squareShown) pts.push(map.latLngToContainerPoint(rec.square.getLatLng()));
+        if (!pts.length) return;
+        const limitY = window.innerHeight - (sheetEl.offsetHeight || 0) - 30;
+        const maxY = Math.max.apply(null, pts.map(function (p) { return p.y; }));
+        if (maxY > limitY) map.panBy([0, maxY - limitY + 20], { animate: true });
+      }, 80);
+    }
+
+    function applySheetI18n() {
+      const cb = document.getElementById('sheet-close');
+      if (cb) cb.setAttribute('aria-label', t('detailsClose'));
+      if (sheetExpandBtn) {
+        const full = !!(sheetEl && sheetEl.classList.contains('full'));
+        sheetExpandBtn.setAttribute('aria-label', full ? t('detailsCollapse') : t('detailsExpand'));
+        sheetExpandBtn.setAttribute('title', full ? t('detailsCollapse') : t('detailsExpand'));
+      }
+    }
+
+    function refreshOpenSheet() {
+      if (!sheetOpen || !sheetRec) return;
+      const rec = registry.get(sheetRec.key);
+      if (!rec || !rec.entry) { closeDetails(); return; }
+      sheetRec = rec;
+      const keepScroll = sheetBody.scrollTop;
+      sheetBody.innerHTML = sheetContent(rec);
+      sheetTitle.textContent = sheetHeadline(rec);
+      sheetBody.scrollTop = keepScroll;
+    }
+
+    function setupAbout() {
+      const fab = document.getElementById('about-fab');
+      const box = document.getElementById('about-box');
+      if (!fab || !box) return;
+      fab.setAttribute('aria-label', t('aboutLabel'));
+      fab.setAttribute('title', t('aboutLabel'));
+      fab.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        box.hidden = !box.hidden;
+      });
+      document.addEventListener('click', function (ev) {
+        if (!box.hidden && ev.target !== fab && !box.contains(ev.target)) box.hidden = true;
+      });
+    }
+
+    function setupSheet() {
+      if (!sheetEl) return;
+      const closeBtn = document.getElementById('sheet-close');
+      const grab = sheetEl.querySelector('.sheet-grab');
+      if (closeBtn) closeBtn.addEventListener('click', closeDetails);
+      const snap = function () { sheetEl.classList.toggle('full'); applySheetI18n(); };
+      if (sheetExpandBtn) sheetExpandBtn.addEventListener('click', snap);
+      if (grab) grab.addEventListener('click', snap);
+      sheetBody.addEventListener('click', function (ev) {
+        const el = ev.target.closest && ev.target.closest('.stop-link');
+        if (!el || el.dataset.lat == null) return;
+        const lat = parseFloat(el.dataset.lat), lon = parseFloat(el.dataset.lon);
+        map.setView([lat, lon], Math.max(map.getZoom(), 14));
+        showStationMarker(lat, lon, el.textContent);
+        if (sheetOpen) {
+          const p = map.latLngToContainerPoint([lat, lon]);
+          const visibleH = window.innerHeight - (sheetEl.offsetHeight || 0);
+          map.panBy([0, p.y - visibleH * 0.5], { animate: true });
+        }
+      });
+      map.on('click', closeDetails);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && sheetOpen) closeDetails(); });
+      applySheetI18n();
+    }
+
+    function loadData() {
+      Promise.all([getMetrics(), getEmig()]).then(render).catch(err => console.error(err));
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const header = document.getElementById('header');
+        if (header) header.style.opacity = '0';
+      }, 1000);
+    });
+
+    setupSearch();
+    setupFollow();
+    setupSheet();
+    setupAbout();
+    setupLangPopup();
+    applyI18n();
+    detectLang();
+
+    function readHash() { try { return decodeURIComponent((location.hash || '').replace(/^#/, '')); } catch (e) { return ''; } }
+    pendingHash = readHash();
+    window.addEventListener('hashchange', function () {
+      const h = readHash();
+      if (!h) { if (sheetOpen) closeDetails(); return; }
+      pendingHash = h;
+      openFromHash();
+    });
+
+    loadData();
+    setInterval(loadData, 15000);
+  </script>
+</body>
+</html>
