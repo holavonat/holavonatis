@@ -8,7 +8,7 @@
   <meta name="author" content="Hol a vonat?" />
   <meta name="robots" content="index, follow" />
   <meta name="language" content="Hungarian" />
-  
+
   <meta property="og:title" content="Hol a vonat? - Valós idejű vonatkövetés Magyarországon" />
   <meta property="og:description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most! Késések, útvonalak, állomások egy helyen." />
   <meta property="og:type" content="website" />
@@ -20,19 +20,19 @@
   <meta property="og:image:alt" content="Hol a vonat?" />
   <meta property="og:locale" content="hu_HU" />
   <meta property="og:site_name" content="Hol a vonat?" />
-  
+
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Hol a vonat? - Valós idejű vonatkövetés" />
   <meta name="twitter:description" content="Valós idejű vonatkövetési térkép. Nézd meg, hol járnak a vonatok most!" />
   <meta name="twitter:image" content="https://holavonat.is/android-chrome-512x512.png" />
   <meta name="twitter:image:alt" content="Hol a vonat?" />
-  
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <link rel="canonical" href="https://holavonat.is/" />
   <link rel="author" href="/humans.txt" />
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
-  
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -62,24 +62,24 @@
     }
   }
   </script>
-  
+
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#ffffff">
-  
+
   <link rel="dns-prefetch" href="//unpkg.com">
   <link rel="dns-prefetch" href="//cdn.holavonat.is">
   <link rel="dns-prefetch" href="//a.tile.openstreetmap.org">
   <link rel="dns-prefetch" href="//b.tile.openstreetmap.org">
   <link rel="dns-prefetch" href="//c.tile.openstreetmap.org">
   <link rel="dns-prefetch" href="//tiles.openrailwaymap.org">
-  
+
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
   <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin>
   <link rel="preconnect" href="https://tiles.openrailwaymap.org" crossorigin>
-    
+
   <link rel="prefetch" href="/android-chrome-192x192.png">
   <link rel="prefetch" href="/android-chrome-512x512.png">
 
@@ -116,13 +116,13 @@
       opacity: 1;
       z-index: 1000;
     }
-    
+
     #header h1 {
       margin: 0;
       font-size: inherit;
       font-weight: inherit;
     }
-    
+
     #disclaimer {
       position: absolute;
       bottom: 28px;
@@ -218,7 +218,7 @@
     }
 
     .leaflet-popup-close-button {
-      font-size: 32px !important; 
+      font-size: 32px !important;
       width: 40px !important;
       height: 40px !important;
       line-height: 40px !important;
@@ -263,6 +263,37 @@
         display: none !important;
       }
     }
+
+    #emig-promo {
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .emig-promo-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 24px;
+      max-width: 380px;
+      width: calc(100% - 40px);
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    .emig-promo-card h2 { margin: 0 0 10px; font-size: 20px; }
+    .emig-promo-card p { margin: 0 0 18px; font-size: 15px; line-height: 1.45; color: #222; }
+    .emig-promo-card a { color: #0033a0; }
+    .emig-promo-actions { display: flex; gap: 10px; justify-content: center; }
+    .emig-promo-actions button {
+      padding: 9px 22px;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      border: 1px solid #aaa;
+    }
+    #emig-promo-yes { background: #0033a0; color: #fff; border-color: #0033a0; }
+    #emig-promo-no { background: #fff; color: #333; }
   </style>
 </head>
 <body>
@@ -281,7 +312,38 @@
     Figyelem! Az adatok utolsó frissítése régen volt. Az információk elavultak lehetnek.
   </div>
 
+  <div id="emig-promo" style="display:none;">
+    <div class="emig-promo-card" role="dialog" aria-modal="true" aria-labelledby="emig-promo-title">
+      <h2 id="emig-promo-title">Újdonság</h2>
+      <p>A <b>holavonat.is</b> mostantól <b>EMIG integrációval</b> is elérhető a(z)
+        <a href="https://emig.holavonat.is">emig.holavonat.is</a> oldalon. Szeretnéd most használni?</p>
+      <div class="emig-promo-actions">
+        <button id="emig-promo-yes" type="button">Igen</button>
+        <button id="emig-promo-no" type="button">Nem</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const SHOW_EMIG_PROMO = false;
+    const EMIG_SITE_URL = 'https://emig.holavonat.is';
+    (function initEmigPromo() {
+      if (!SHOW_EMIG_PROMO) return;
+      try {
+        if (localStorage.getItem('holavonat_emig_promo_dismissed') === '1') return;
+      } catch (e) { /* localStorage unavailable — show anyway */ }
+      const el = document.getElementById('emig-promo');
+      if (!el) return;
+      el.style.display = 'flex';
+      const yes = document.getElementById('emig-promo-yes');
+      const no = document.getElementById('emig-promo-no');
+      if (yes) yes.addEventListener('click', () => { window.location.href = EMIG_SITE_URL; });
+      if (no) no.addEventListener('click', () => {
+        el.style.display = 'none';
+        try { localStorage.setItem('holavonat_emig_promo_dismissed', '1'); } catch (e) { /* ignore */ }
+      });
+    })();
+
     const map = L.map('map', { attributionControl: true }).setView([47.3, 19.1], 8);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
@@ -315,41 +377,41 @@
 
     function decodePolyline(encoded) {
       if (!encoded || encoded.length === 0) return [];
-      
+
       const coordinates = [];
       const len = encoded.length;
       let index = 0;
       let lat = 0;
       let lng = 0;
-      
+
       const decodeValue = () => {
         let result = 0;
         let shift = 0;
         let b;
-        
+
         do {
           b = encoded.charCodeAt(index++) - 63;
           result |= (b & 0x1f) << shift;
           shift += 5;
         } while (b >= 0x20 && index < len);
-        
+
         return (result & 1) ? ~(result >> 1) : (result >> 1);
       };
-      
+
       while (index < len) {
         lat += decodeValue();
-        lng += decodeValue();        
+        lng += decodeValue();
         coordinates.push([lat * 1e-5, lng * 1e-5]);
       }
-      
+
       return coordinates;
     }
 
     function delayColor(min) {
-      if (min >= 60) return '#ff0000';      
+      if (min >= 60) return '#ff0000';
       if (min >= 21) return '#ff9900';
       if (min >= 15) return '#ffe600';
-      if (min >= 5)  return '#bfff00'; 
+      if (min >= 5)  return '#bfff00';
       return '#00e400';
     }
 
@@ -386,7 +448,7 @@
       for (const stop of stops) {
         const arrivalTime = stop.realtimeArrival;
         if (arrivalTime > now) {
-          return stop.arrivalDelay || stop.departureDelay || 0; 
+          return stop.arrivalDelay || stop.departureDelay || 0;
         }
       }
       const lastStop = stops[stops.length - 1];
@@ -485,13 +547,13 @@
           } else {
             uic = id;
           }
- 
+
           marker.bindTooltip(`${vehicleName} (${uic}) (${speed} km/h) - ${delayText}`, {
             direction: "top"
           });
 
           var routePolyline = null;
-          
+
           marker.on('mouseover', (e) => {
             if (vehicle.trip.tripGeometry && vehicle.trip.tripGeometry.points && !routePolyline) {
               const decodedPoints = decodePolyline(vehicle.trip.tripGeometry.points);
@@ -516,7 +578,7 @@
             const arr = formatTime(stop.scheduledArrival);
             const rta = formatTime(stop.realtimeArrival);
             const dep = formatTime(stop.scheduledDeparture);
-            const rtd = formatTime(stop.realtimeDeparture); 
+            const rtd = formatTime(stop.realtimeDeparture);
             let track = stop.stop.platformCode
             if (track == null) {
               track = "-";
@@ -533,7 +595,7 @@
               <td>${track}</td>
             </tr>`;
           });
-          table += '</table></div>';          
+          table += '</table></div>';
 
           var services = "";
           const serviceDetails = new Map();
