@@ -3,3 +3,10 @@ holavonatis
 holavonat.log
 output/
 vendor/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
