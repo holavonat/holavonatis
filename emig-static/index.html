@@ -2089,7 +2089,7 @@
     function closeDetails() {
       if (activeKey) {
         const rec = registry.get(activeKey);
-        if (rec && rec.entry && rec.entry.emig) hideSquare(rec);
+        if (rec && rec.entry && rec.entry.emig && rec.entry.emma) hideSquare(rec);
         if (rec) hideRoute(rec);
         activeKey = null;
       }
