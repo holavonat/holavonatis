@@ -2072,7 +2072,7 @@
       }
       if (activeKey && activeKey !== rec.key) {
         const prev = registry.get(activeKey);
-        if (prev) { if (prev.entry && prev.entry.emig) hideSquare(prev); hideRoute(prev); }
+        if (prev) { if (prev.entry && prev.entry.emig && prev.entry.emma) hideSquare(prev); hideRoute(prev); }
       }
       activeKey = rec.key;
       sheetRec = rec;
